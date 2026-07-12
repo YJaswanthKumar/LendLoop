@@ -17,6 +17,14 @@ The platform provides secure user authentication, asset management, rental reque
 | APIs           | RESTful APIs                              |
 | Architecture   | MVC + Service Layer                       |
 
+# Project Links
+
+| Resource | Link |
+|----------|------|
+| GitHub Repository | :contentReference[oaicite:0]{index=0} |
+| Frontend Deployment | https://lend-loop-kohl.vercel.app |
+| Backend API | https://lendloop-oizd.onrender.com |
+
 # Demo Credentials
 
 To simplify project evaluation, the following test accounts are available. These accounts already contain sample data (assets, rental history, notifications, etc.) stored in the Supabase database.
