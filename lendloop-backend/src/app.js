@@ -11,6 +11,10 @@ const { success } = require('./utils/response');
 const app = express();
 
 app.use(helmet());
+console.log("=================================");
+console.log("NODE_ENV:", env.nodeEnv);
+console.log("CLIENT_URL:", env.clientUrl);
+console.log("=================================");
 app.use(cors({ origin: env.clientUrl }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
