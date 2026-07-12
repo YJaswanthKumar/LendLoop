@@ -14,7 +14,9 @@ import viteTsConfigPaths from "vite-tsconfig-paths";
 //    automatically — no extra config needed.
 export default defineConfig({
   server: {
-    port: 3000,
+    port: 5000,
+    host: "0.0.0.0",
+    allowedHosts: true,
   },
   resolve: {
     // Avoid duplicate React/TanStack instances being bundled twice.
