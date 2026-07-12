@@ -16,6 +16,7 @@ router.use(authenticate);
 
 router.post('/', createRentalValidator, validate, rentalController.createRentalRequest);
 router.get('/history', rentalHistoryValidator, validate, rentalController.getRentalHistory);
+router.get('/:id', rentalIdValidator, validate, rentalController.getRentalDetails);
 router.patch('/:id/counter-offer', counterOfferValidator, validate, rentalController.counterOffer);
 router.patch('/:id/accept', acceptOfferValidator, validate, rentalController.acceptOffer);
 router.patch('/:id/reject', rentalIdValidator, validate, rentalController.rejectOffer);

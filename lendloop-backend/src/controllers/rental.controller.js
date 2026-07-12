@@ -64,6 +64,15 @@ async function getRentalHistory(req, res, next) {
   }
 }
 
+async function getRentalDetails(req, res, next) {
+  try {
+    const rental = await rentalService.getRentalDetails(req.params.id, req.user.id);
+    return success(res, 200, 'Rental fetched successfully', { rental });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   createRentalRequest,
   counterOffer,
@@ -72,4 +81,5 @@ module.exports = {
   cancelRental,
   completeRental,
   getRentalHistory,
+  getRentalDetails,
 };

@@ -5,6 +5,38 @@ const { RENTAL_STATUS, ASSET_AVAILABILITY, NOTIFICATION_TYPE } = require('../uti
 const assetService = require('./asset.service');
 const notificationService = require('./notification.service');
 
+const CONTACT_VISIBLE_STATUSES = [
+  RENTAL_STATUS.ACCEPTED,
+  RENTAL_STATUS.ACTIVE,
+  RENTAL_STATUS.COMPLETED,
+];
+
+async function fetchContacts(userIds) {
+  if (!userIds.length) return {};
+  const { data: users } = await supabase
+    .from('users')
+    .select('id, full_name, email, phone, city, state')
+    .in('id', userIds);
+  return Object.fromEntries((users || []).map((u) => [u.id, u]));
+}
+
+async function attachContacts(rentals) {
+  const eligible = rentals.filter((r) => CONTACT_VISIBLE_STATUSES.includes(r.status));
+  if (!eligible.length) return rentals;
+
+  const userIds = [...new Set(eligible.flatMap((r) => [r.owner_id, r.borrower_id]))];
+  const userMap = await fetchContacts(userIds);
+
+  return rentals.map((r) => {
+    if (!CONTACT_VISIBLE_STATUSES.includes(r.status)) return r;
+    return {
+      ...r,
+      owner_contact: userMap[r.owner_id] || null,
+      borrower_contact: userMap[r.borrower_id] || null,
+    };
+  });
+}
+
 async function getRentalById(id) {
   const { data: rental, error } = await supabase.from('rentals').select('*').eq('id', id).maybeSingle();
 
@@ -16,6 +48,13 @@ async function getRentalById(id) {
   }
 
   return rental;
+}
+
+async function getRentalDetails(id, userId) {
+  const rental = await getRentalById(id);
+  assertParticipant(rental, userId);
+  const [enriched] = await attachContacts([rental]);
+  return enriched;
 }
 
 function assertParticipant(rental, userId) {
@@ -304,11 +343,14 @@ async function getRentalHistory(userId, query) {
     throw new AppError('Failed to fetch rental history', 500);
   }
 
-  return { rentals: data, pagination: buildPaginationMeta(page, limit, count) };
+  const rentals = await attachContacts(data || []);
+
+  return { rentals, pagination: buildPaginationMeta(page, limit, count) };
 }
 
 module.exports = {
   getRentalById,
+  getRentalDetails,
   createRentalRequest,
   counterOffer,
   acceptOffer,
