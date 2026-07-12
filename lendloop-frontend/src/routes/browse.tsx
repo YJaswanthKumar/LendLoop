@@ -8,7 +8,7 @@ import { Loader } from "@/components/Loader";
 import { Pagination } from "@/components/Pagination";
 import { getApiError } from "@/api/api";
 import { listAssets, nearbyAssets, searchAssets } from "@/services/assetService";
-import { getBrowserLocation } from "@/utils/googleMaps";
+import { getBrowserLocation } from "@/utils/locationUtils";
 import { CATEGORIES, type Asset, type PaginationInfo } from "@/utils/types";
 
 interface BrowseSearch {
@@ -69,7 +69,7 @@ function BrowsePage() {
         }
         const data = await nearbyAssets(loc.latitude, loc.longitude, Number(distance), page, 12);
         let list = data.assets;
-        if (category) list = list.filter((a) => a.category === category);
+        if (category) list = list.filter((a) => a.category.toLowerCase() === category.toLowerCase());
         if (minPrice) list = list.filter((a) => a.expected_price_per_day >= Number(minPrice));
         if (maxPrice) list = list.filter((a) => a.expected_price_per_day <= Number(maxPrice));
         if (q) list = list.filter((a) => a.title.toLowerCase().includes(q.toLowerCase()));
@@ -78,7 +78,7 @@ function BrowsePage() {
       } else if (q.trim()) {
         const data = await searchAssets(q.trim(), page, 12);
         let list = data.assets;
-        if (category) list = list.filter((a) => a.category === category);
+        if (category) list = list.filter((a) => a.category.toLowerCase() === category.toLowerCase());
         setAssets(list);
         setPagination(data.pagination);
       } else {

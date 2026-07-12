@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Bell, Check } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Bell } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { getApiError } from "@/api/api";
@@ -9,7 +9,7 @@ import { Loader } from "@/components/Loader";
 import { Pagination } from "@/components/Pagination";
 import { listNotifications, markNotificationRead } from "@/services/notificationService";
 import { timeAgo } from "@/utils/format";
-import type { AppNotification, PaginationInfo } from "@/utils/types";
+import type { AppNotification, NotificationType, PaginationInfo } from "@/utils/types";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({
@@ -21,7 +21,24 @@ export const Route = createFileRoute("/_authenticated/notifications")({
   component: NotificationsPage,
 });
 
+function notificationRoute(type: NotificationType): string | null {
+  switch (type) {
+    case "REQUEST":
+    case "COUNTER_OFFER":
+    case "ACCEPTED":
+    case "ACTIVE":
+      return "/requests";
+    case "REJECTED":
+    case "COMPLETED":
+      return "/history";
+    case "GENERAL":
+    default:
+      return null;
+  }
+}
+
 function NotificationsPage() {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [page, setPage] = useState(1);
@@ -43,19 +60,25 @@ function NotificationsPage() {
 
   useEffect(load, [load]);
 
-  const markRead = async (n: AppNotification) => {
-    if (n.is_read) return;
-    setBusyId(n.id);
-    try {
-      await markNotificationRead(n.id);
-      setNotifications((list) =>
-        list.map((x) => (x.id === n.id ? { ...x, is_read: true } : x)),
-      );
-    } catch (err) {
-      toast.error(getApiError(err));
-    } finally {
+  const handleNotificationClick = async (n: AppNotification) => {
+    if (busyId) return;
+    if (!n.is_read) {
+      setBusyId(n.id);
+      try {
+        await markNotificationRead(n.id);
+        setNotifications((list) =>
+          list.map((x) => (x.id === n.id ? { ...x, is_read: true } : x)),
+        );
+        window.dispatchEvent(new CustomEvent("lendloop:notification-read"));
+      } catch (err) {
+        toast.error(getApiError(err));
+        setBusyId(null);
+        return;
+      }
       setBusyId(null);
     }
+    const route = notificationRoute(n.type);
+    if (route) navigate({ to: route as never });
   };
 
   return (
@@ -72,27 +95,37 @@ function NotificationsPage() {
           <EmptyState icon={Bell} title="No notifications" description="You're all caught up!" />
         ) : (
           <div className="card-elevated divide-y divide-border">
-            {notifications.map((n) => (
-              <div key={n.id} className={`flex gap-3 px-4 py-4 ${n.is_read ? "opacity-70" : ""}`}>
-                <span
-                  className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${n.is_read ? "bg-muted-foreground/30" : "bg-primary"}`}
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold">{n.title}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{n.message}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{timeAgo(n.created_at)}</p>
+            {notifications.map((n) => {
+              const hasLink = notificationRoute(n.type) !== null;
+              return (
+                <div
+                  key={n.id}
+                  onClick={() => handleNotificationClick(n)}
+                  className={[
+                    "flex gap-3 px-4 py-4 transition-colors",
+                    n.is_read ? "opacity-70" : "",
+                    hasLink || !n.is_read ? "cursor-pointer hover:bg-muted/50" : "",
+                    busyId === n.id ? "pointer-events-none opacity-50" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <span
+                    className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${n.is_read ? "bg-muted-foreground/30" : "bg-primary"}`}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold">{n.title}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">{n.message}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{timeAgo(n.created_at)}</p>
+                    {hasLink && (
+                      <p className="mt-1 text-xs font-medium text-primary">
+                        {!n.is_read ? "Click to mark read and go →" : "Click to go →"}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                {!n.is_read && (
-                  <button
-                    onClick={() => markRead(n)}
-                    disabled={busyId === n.id}
-                    className="btn-outline h-8 shrink-0 px-3 text-xs"
-                  >
-                    <Check className="h-3.5 w-3.5" /> Mark read
-                  </button>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         {pagination && <Pagination pagination={{ ...pagination, page }} onPageChange={setPage} />}

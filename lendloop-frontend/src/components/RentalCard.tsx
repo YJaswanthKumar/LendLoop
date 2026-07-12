@@ -12,6 +12,27 @@ export type RentalAction =
   | "counter"
   | "review";
 
+function roleDescription(status: Rental["status"], isOwner: boolean): string {
+  switch (status) {
+    case "REQUESTED":
+      return isOwner ? "New rental request" : "Awaiting owner approval";
+    case "NEGOTIATING":
+      return isOwner ? "Counter offer sent — waiting for borrower" : "Counter offer received";
+    case "ACCEPTED":
+      return isOwner ? "Accepted — confirm handover when done" : "Accepted — awaiting pickup";
+    case "ACTIVE":
+      return isOwner ? "Rental active — mark complete on return" : "Rental active";
+    case "COMPLETED":
+      return "Rental completed";
+    case "REJECTED":
+      return "Request rejected";
+    case "CANCELLED":
+      return "Request cancelled";
+    default:
+      return isOwner ? "You own this item" : "You requested this item";
+  }
+}
+
 export function RentalCard({
   rental,
   currentUserId,
@@ -24,7 +45,6 @@ export function RentalCard({
   busy: boolean;
 }) {
   const isOwner = rental.owner_id === currentUserId;
-  const role = isOwner ? "You own this item" : "You requested this item";
   const price =
     rental.agreed_price ?? rental.counter_offer_price ?? rental.offered_price ?? rental.expected_price;
 
@@ -40,16 +60,23 @@ export function RentalCard({
       }
       break;
     case "NEGOTIATING":
-      actions.push({ label: "Accept offer", action: "accept", primary: true });
-      if (isOwner) actions.push({ label: "Reject", action: "reject", danger: true });
-      else actions.push({ label: "Cancel", action: "cancel", danger: true });
+      if (!isOwner) {
+        actions.push({ label: "Accept offer", action: "accept", primary: true });
+        actions.push({ label: "Cancel", action: "cancel", danger: true });
+      } else {
+        actions.push({ label: "Retract offer", action: "reject", danger: true });
+      }
       break;
     case "ACCEPTED":
-      actions.push({ label: "Mark completed", action: "complete", primary: true });
+      if (isOwner) {
+        actions.push({ label: "Mark as complete", action: "complete", primary: true });
+      }
       actions.push({ label: "Cancel", action: "cancel", danger: true });
       break;
     case "ACTIVE":
-      actions.push({ label: "Mark completed", action: "complete", primary: true });
+      if (isOwner) {
+        actions.push({ label: "Mark as complete", action: "complete", primary: true });
+      }
       break;
     case "COMPLETED":
       actions.push({ label: "Leave a review", action: "review", primary: true });
@@ -89,7 +116,7 @@ export function RentalCard({
           </Link>
           <StatusBadge status={rental.status} />
         </div>
-        <p className="mt-0.5 text-xs text-muted-foreground">{role}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{roleDescription(rental.status, isOwner)}</p>
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <CalendarDays className="h-3.5 w-3.5" />

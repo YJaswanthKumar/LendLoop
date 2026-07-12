@@ -1,0 +1,25 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "LendLoop is a full-stack web application that enables individuals to list, discover, rent, and manage community-owned assets through a secure and user-friendly platform. Instead of purchasing items that are only used occasionally, users can share resources within their community, making rentals more affordable and reducing unnecessary ownership.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YJaswanthKumar/LendLoop.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YJaswanthKumar/LendLoop/issues"
+  },
+  "homepage": "https://github.com/YJaswanthKumar/LendLoop#readme",
+  "dependencies": {
+    "@types/leaflet": "^1.9.21",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^5.0.0"
+  }
+}

@@ -1,0 +1,375 @@
+I have a fully working MERN application called LendLoop.
+
+The backend is already completed, tested, and deployed. I do not want unnecessary API changes, database schema changes, or backend business logic changes. My priority is to improve the frontend while preserving compatibility with the current backend.
+
+Before changing anything, first analyze the existing project and reuse the existing APIs wherever possible.
+
+If a requested feature cannot be implemented without modifying APIs or database schema, do not implement it automatically. Instead, document why it cannot be done and recommend it as a future enhancement.
+
+The final project must remain completely portable.
+
+It should work after exporting to GitHub and deploying manually to:
+
+Vercel (Frontend)
+Render (Backend)
+
+Do NOT introduce any Replit-specific or Claude-specific dependency.
+
+Priority 1 (Highest)
+Replace Google Maps completely
+
+The project currently uses Google Maps.
+
+I want Google Maps removed completely.
+
+Replace it with:
+
+OpenStreetMap
+Leaflet
+React Leaflet
+
+Requirements:
+
+No Google Maps API
+No API key
+No billing
+No paid services
+No backend modifications
+No database modifications
+
+Reuse existing fields:
+
+latitude
+longitude
+address
+city
+state
+country
+
+Display:
+
+Interactive map
+Marker
+Popup
+Responsive layout
+Existing styling
+
+If coordinates are unavailable:
+
+Display
+
+📍 Pickup Location
+
+Address
+
+City, State
+
+Location unavailable.
+
+Below the map display:
+
+Open in Google Maps
+
+Clicking should open
+
+https://www.google.com/maps?q=<latitude>,<longitude>
+
+If Leaflet migration cannot be completed cleanly without breaking existing functionality,
+
+DO NOT force it.
+
+Instead implement the fallback location card above.
+
+Priority 2
+Notification System
+
+Current issues
+
+Notification badge does not update immediately.
+Notification count remains incorrect until refresh.
+Clicking notification performs no action.
+
+Required
+
+When notification is clicked
+
+mark notification as read
+update badge immediately
+navigate to the correct page
+
+Examples
+
+Rental Request
+
+→ Requests
+
+Rental Approved
+
+→ Requests
+
+Rental Completed
+
+→ History
+
+Asset Update
+
+→ Asset Details
+
+Use existing APIs only.
+
+Priority 3
+Requests Page UX
+
+Current problems
+
+Outgoing request shows
+
+Mark as Complete
+
+This is incorrect.
+
+Asset details still show
+
+Request Rental
+
+even though it was already requested.
+
+Required
+
+Improve wording.
+
+Examples
+
+Pending Approval
+
+Negotiating
+
+Accepted
+
+Rejected
+
+Cancelled
+
+Completed
+
+Waiting for Owner
+
+Requested
+
+On Asset Details page
+
+Do not display
+
+Request Rental
+
+when already requested.
+
+Instead display the real request state.
+
+Do not modify APIs.
+
+Priority 4
+Category Filter
+
+The category filter is not working correctly.
+
+Find the issue.
+
+Fix it.
+
+Reuse existing APIs.
+
+No backend modification.
+
+Priority 5
+Contact Details After Approval
+
+Current behavior
+
+Owner details remain hidden.
+
+This is good before approval.
+
+After request becomes Accepted
+
+both parties should see
+
+Name
+Phone
+Email
+Pickup location
+
+Only if those fields already exist in current APIs.
+
+Do not create new APIs unless impossible.
+
+Behavior should resemble real platforms such as
+
+Uber
+Airbnb
+Rapido
+OLX
+Lower Priority (Do NOT Implement if Backend Changes Are Required)
+Multiple Image Upload
+
+Current listing accepts only one image URL.
+
+Desired future feature
+
+Upload multiple images
+Image preview
+Image slider
+Add/Delete images
+Edit listing supports multiple images
+
+However
+
+Current backend schema only stores
+
+image_url
+
+If this requires
+
+schema changes
+API changes
+
+DO NOT implement.
+
+Instead
+
+Document
+
+required schema
+required APIs
+implementation approach
+
+for future work.
+
+Future Feature Only
+Chat / Negotiation
+
+I eventually want
+
+Buyer ↔ Owner chat
+
+for price negotiation.
+
+However
+
+If this requires
+
+WebSockets
+database schema
+new APIs
+backend redesign
+
+DO NOT implement.
+
+Instead
+
+Provide
+
+architecture
+required APIs
+required database
+implementation plan
+
+for a future version.
+
+Code Quality
+Remove dead Google Maps code.
+Remove unused imports.
+Remove unused packages.
+Maintain current project structure.
+Keep reusable components.
+Maintain responsiveness.
+Preserve UI consistency.
+Do not break existing features.
+Restrictions
+
+Unless absolutely necessary
+
+DO NOT
+
+modify backend APIs
+modify response formats
+modify database schema
+modify Supabase tables
+modify authentication
+change backend business logic
+
+Frontend-first implementation is preferred.
+
+Deliverables
+
+After completing the work create
+
+IMPLEMENTATION_REPORT.md
+
+Include
+
+Features Completed
+
+Everything implemented.
+
+Files Modified
+
+List all modified files.
+
+Packages Added
+
+List installed packages.
+
+Backend Changes
+
+Clearly state
+
+No backend changes
+
+or list them if absolutely required.
+
+Existing APIs Reused
+
+Mention every API reused.
+
+Features Deferred
+
+Explain why they were deferred.
+
+Known Limitations
+
+Mention limitations.
+
+Build Instructions
+
+Frontend
+
+npm install
+npm run dev
+npm run build
+
+Backend
+
+npm install
+npm start
+Deployment
+
+Explain deployment to
+
+GitHub
+Vercel
+Render
+
+Mention environment variables if any.
+
+Verification Checklist
+
+Confirm
+
+Existing APIs remain compatible
+No schema changes
+No broken functionality
+Project builds successfully
+Ready for manual deployment
+
+Important: Work in priority order. Complete Priority 1 before moving to Priority 2, and continue sequentially. If a higher-priority task cannot be completed safely, stop, document the reason, and proceed with the agreed fallback instead of making risky changes.

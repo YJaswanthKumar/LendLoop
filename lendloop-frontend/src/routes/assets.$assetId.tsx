@@ -16,9 +16,9 @@ import { Modal } from "@/components/Modal";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAuth } from "@/context/AuthContext";
 import { getAsset } from "@/services/assetService";
-import { createRental } from "@/services/rentalService";
+import { createRental, rentalHistory } from "@/services/rentalService";
 import { daysBetween, formatDate, formatPrice } from "@/utils/format";
-import type { Asset } from "@/utils/types";
+import type { Asset, Rental } from "@/utils/types";
 
 export const Route = createFileRoute("/assets/$assetId")({
   head: () => ({
@@ -30,6 +30,8 @@ export const Route = createFileRoute("/assets/$assetId")({
   component: AssetDetailsPage,
 });
 
+const ACTIVE_STATUSES = new Set(["REQUESTED", "NEGOTIATING", "ACCEPTED", "ACTIVE"]);
+
 function AssetDetailsPage() {
   const { assetId } = Route.useParams();
   const { user, isAuthenticated } = useAuth();
@@ -39,6 +41,7 @@ function AssetDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [existingRental, setExistingRental] = useState<Rental | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -50,6 +53,18 @@ function AssetDetailsPage() {
   }, [assetId]);
 
   useEffect(load, [load]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    rentalHistory({ role: "borrower", limit: 50 })
+      .then(({ rentals }) => {
+        const found = rentals.find(
+          (r) => r.asset_id === assetId && ACTIVE_STATUSES.has(r.status),
+        );
+        setExistingRental(found ?? null);
+      })
+      .catch(() => {});
+  }, [assetId, isAuthenticated]);
 
   if (loading) return <Loader full label="Loading item…" />;
   if (error || !asset)
@@ -68,6 +83,20 @@ function AssetDetailsPage() {
       return;
     }
     setModalOpen(true);
+  };
+
+  const requestButtonContent = () => {
+    if (existingRental) {
+      const labels: Record<string, string> = {
+        REQUESTED: "Request pending approval",
+        NEGOTIATING: "Negotiating — check Requests",
+        ACCEPTED: "Rental accepted — check Requests",
+        ACTIVE: "Rental active — check Requests",
+      };
+      return labels[existingRental.status] ?? "Already requested";
+    }
+    if (asset.availability_status === "AVAILABLE") return "Request rental";
+    return "Currently unavailable";
   };
 
   return (
@@ -165,13 +194,25 @@ function AssetDetailsPage() {
                 >
                   Edit your listing
                 </Link>
+              ) : existingRental ? (
+                <div className="space-y-2">
+                  <div className="rounded-xl border border-border bg-muted/50 px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+                    {requestButtonContent()}
+                  </div>
+                  <Link
+                    to="/requests"
+                    className="btn-outline w-full py-2 text-xs"
+                  >
+                    View your request →
+                  </Link>
+                </div>
               ) : (
                 <button
                   onClick={onRequest}
                   disabled={asset.availability_status !== "AVAILABLE"}
                   className="btn-primary w-full py-3 text-sm"
                 >
-                  {asset.availability_status === "AVAILABLE" ? "Request rental" : "Currently unavailable"}
+                  {requestButtonContent()}
                 </button>
               )}
             </div>

@@ -11,9 +11,6 @@ export const API_BASE_URL: string = isServer
   ? "http://localhost:3001"
   : (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
 
-/** Google Maps browser key (optional — map features degrade gracefully without it). */
-export const GOOGLE_MAPS_API_KEY: string =
-  (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined) ?? "";
 
 export const TOKEN_STORAGE_KEY = "lendloop_token";
 export const USER_STORAGE_KEY = "lendloop_user";

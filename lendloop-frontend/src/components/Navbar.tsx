@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Bell, Leaf, LogOut, Menu, Plus, User as UserIcon, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { listNotifications } from "@/services/notificationService";
 import { initials } from "@/utils/format";
@@ -11,13 +11,31 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [unread, setUnread] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchUnread = () => {
+    if (!isAuthenticated) return;
+    listNotifications({ isRead: false, limit: 1 })
+      .then((d) => setUnread(d.pagination.totalItems))
+      .catch(() => {});
+  };
 
   useEffect(() => {
     if (!hydrated || !isAuthenticated) return;
-    listNotifications({ isRead: false, limit: 1 })
-      .then((d) => setUnread(d.pagination.totalItems))
-      .catch(() => setUnread(0));
+    fetchUnread();
+    intervalRef.current = setInterval(fetchUnread, 30_000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, isAuthenticated]);
+
+  useEffect(() => {
+    const handler = () => fetchUnread();
+    window.addEventListener("lendloop:notification-read", handler);
+    return () => window.removeEventListener("lendloop:notification-read", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     logout();
