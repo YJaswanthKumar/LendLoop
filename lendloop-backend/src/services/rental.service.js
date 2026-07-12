@@ -15,9 +15,23 @@ async function fetchContacts(userIds) {
   if (!userIds.length) return {};
   const { data: users } = await supabase
     .from('users')
-    .select('id, full_name, email, phone, city, state')
+    .select('id, full_name, email, phone, city, state, latitude, longitude')
     .in('id', userIds);
   return Object.fromEntries((users || []).map((u) => [u.id, u]));
+}
+
+// Borrowers get the owner's full contact + pickup coordinates (they need to find the item).
+// Owners only get the borrower's identity/contact info, not location (no pickup location to share).
+function toOwnerContact(user) {
+  if (!user) return null;
+  const { id, full_name, email, phone, city, state, latitude, longitude } = user;
+  return { id, full_name, email, phone, city, state, latitude, longitude };
+}
+
+function toBorrowerContact(user) {
+  if (!user) return null;
+  const { id, full_name, email, phone, city, state } = user;
+  return { id, full_name, email, phone, city, state };
 }
 
 async function attachContacts(rentals) {
@@ -31,8 +45,8 @@ async function attachContacts(rentals) {
     if (!CONTACT_VISIBLE_STATUSES.includes(r.status)) return r;
     return {
       ...r,
-      owner_contact: userMap[r.owner_id] || null,
-      borrower_contact: userMap[r.borrower_id] || null,
+      owner_contact: toOwnerContact(userMap[r.owner_id]),
+      borrower_contact: toBorrowerContact(userMap[r.borrower_id]),
     };
   });
 }

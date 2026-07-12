@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { CalendarDays, IndianRupee, MessageSquare } from "lucide-react";
-import type { Rental } from "@/utils/types";
+import { CalendarDays, IndianRupee, Mail, MapPin, MessageSquare, Phone } from "lucide-react";
+import type { OwnerContact, Rental } from "@/utils/types";
 import { formatDate, formatPrice } from "@/utils/format";
 import { StatusBadge } from "./StatusBadge";
 
@@ -31,6 +31,61 @@ function roleDescription(status: Rental["status"], isOwner: boolean): string {
     default:
       return isOwner ? "You own this item" : "You requested this item";
   }
+}
+
+function googleMapsUrl(latitude: number, longitude: number): string {
+  return `https://www.google.com/maps?q=${latitude},${longitude}`;
+}
+
+function ContactDetails({ rental, isOwner }: { rental: Rental; isOwner: boolean }) {
+  const contact = isOwner ? rental.borrower_contact : rental.owner_contact;
+  if (!contact) return null;
+
+  const ownerContact = !isOwner ? (contact as OwnerContact) : null;
+  const pickup =
+    ownerContact && ownerContact.latitude != null && ownerContact.longitude != null
+      ? { latitude: ownerContact.latitude, longitude: ownerContact.longitude }
+      : null;
+
+  return (
+    <div className="mt-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-xs">
+      <p className="font-semibold text-foreground">
+        {isOwner ? "Borrower" : "Owner"} contact
+      </p>
+      <div className="mt-1 flex flex-col gap-1 text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <span className="font-medium text-foreground">{contact.full_name}</span>
+        </span>
+        {contact.phone && (
+          <span className="flex items-center gap-1.5">
+            <Phone className="h-3 w-3 shrink-0" />
+            {contact.phone}
+          </span>
+        )}
+        <span className="flex items-center gap-1.5">
+          <Mail className="h-3 w-3 shrink-0" />
+          {contact.email}
+        </span>
+        {(contact.city || contact.state) && (
+          <span className="flex items-center gap-1.5">
+            <MapPin className="h-3 w-3 shrink-0" />
+            {[contact.city, contact.state].filter(Boolean).join(", ")}
+          </span>
+        )}
+      </div>
+      {pickup && (
+        <a
+          href={googleMapsUrl(pickup.latitude, pickup.longitude)}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+        >
+          <MapPin className="h-3 w-3" />
+          Open pickup location in Google Maps
+        </a>
+      )}
+    </div>
+  );
 }
 
 export function RentalCard({
@@ -136,6 +191,7 @@ export function RentalCard({
             <span className="line-clamp-2">{rental.owner_message ?? rental.borrower_message}</span>
           </p>
         )}
+        <ContactDetails rental={rental} isOwner={isOwner} />
         {actions.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {actions.map((a) => (

@@ -69,6 +69,28 @@ export interface Asset {
   distance_km?: number;
 }
 
+// Only present once the rental is ACCEPTED/ACTIVE/COMPLETED — the backend hides
+// contact/location details before that.
+export interface OwnerContact {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  city: string | null;
+  state: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export interface BorrowerContact {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  city: string | null;
+  state: string | null;
+}
+
 export interface Rental {
   id: string;
   asset_id: string;
@@ -89,6 +111,8 @@ export interface Rental {
   created_at: string;
   updated_at: string;
   asset?: Asset;
+  owner_contact?: OwnerContact | null;
+  borrower_contact?: BorrowerContact | null;
 }
 
 export interface Review {

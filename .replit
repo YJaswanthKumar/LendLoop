@@ -13,7 +13,6 @@ CLIENT_URL = "*"
 NODE_ENV = "development"
 JWT_EXPIRES_IN = "4d"
 SUPABASE_URL = "https://royvcqkcppayzazukhxx.supabase.co"
-JWT_SECRET = "qkL0BZEkKaw9g3+TKK8fdxF1crau9Ju7gNyWbUATMA4lELCVgB46W+kLQAMcgQVFRwfGepskXhBrwcr1xouU1w=="
 
 [workflows]
 runButton = "Project"
