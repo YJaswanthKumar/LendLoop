@@ -1,9 +1,15 @@
 /**
  * Central API configuration — ALL backend URLs derive from here.
- * Set VITE_API_BASE_URL in your environment to point at the deployed backend.
+ *
+ * Server-side (SSR): talk directly to the backend on localhost:3001.
+ * Client-side (browser): use VITE_API_BASE_URL (the public Replit dev-domain
+ * URL for the backend port) so the browser can reach the backend through
+ * Replit's proxy.
  */
-export const API_BASE_URL: string =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:5000";
+const isServer = typeof window === "undefined";
+export const API_BASE_URL: string = isServer
+  ? "http://localhost:3001"
+  : (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
 
 /** Google Maps browser key (optional — map features degrade gracefully without it). */
 export const GOOGLE_MAPS_API_KEY: string =

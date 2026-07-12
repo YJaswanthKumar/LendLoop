@@ -30,7 +30,12 @@ export default defineConfig({
     tanstackStart({
       server: { entry: "server" },
     }),
-    nitro(),
+    nitro({
+      routeRules: {
+        "/api/**": { proxy: "http://localhost:3001/api/**" },
+        "/health": { proxy: "http://localhost:3001/health" },
+      },
+    }),
     viteReact(),
   ],
 });

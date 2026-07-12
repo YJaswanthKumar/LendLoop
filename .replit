@@ -13,7 +13,6 @@ CLIENT_URL = "*"
 NODE_ENV = "development"
 JWT_EXPIRES_IN = "4d"
 SUPABASE_URL = "https://royvcqkcppayzazukhxx.supabase.co"
-VITE_API_BASE_URL = "http://localhost:3001"
 
 [workflows]
 runButton = "Project"

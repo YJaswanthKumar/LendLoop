@@ -1,0 +1,1 @@
+- [Replit fullstack CORS fix via Nitro proxy](replit-fullstack-cors.md) — Nitro routeRules proxy is the only reliable way to connect a separate Express backend in Replit dev; Vite proxy and direct cross-port browser calls both fail.
