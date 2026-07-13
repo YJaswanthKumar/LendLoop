@@ -8,6 +8,7 @@ export type RentalAction =
   | "accept"
   | "reject"
   | "cancel"
+  | "start"
   | "complete"
   | "counter"
   | "review";
@@ -15,19 +16,19 @@ export type RentalAction =
 function roleDescription(status: Rental["status"], isOwner: boolean): string {
   switch (status) {
     case "REQUESTED":
-      return isOwner ? "New rental request" : "Awaiting owner approval";
+      return isOwner ? "New request — respond to reserve it" : "Sent — waiting on owner's response";
     case "NEGOTIATING":
-      return isOwner ? "Counter offer sent — waiting for borrower" : "Counter offer received";
+      return isOwner ? "Counter offer sent — waiting on borrower" : "Owner proposed a new price";
     case "ACCEPTED":
-      return isOwner ? "Accepted — confirm handover when done" : "Accepted — awaiting pickup";
+      return isOwner ? "Booking confirmed — confirm pickup to start" : "Booking confirmed — awaiting pickup";
     case "ACTIVE":
-      return isOwner ? "Rental active — mark complete on return" : "Rental active";
+      return isOwner ? "Rental in progress — confirm return when it's back" : "Rental in progress";
     case "COMPLETED":
       return "Rental completed";
     case "REJECTED":
-      return "Request rejected";
+      return "Request declined";
     case "CANCELLED":
-      return "Request cancelled";
+      return "Request withdrawn";
     default:
       return isOwner ? "You own this item" : "You requested this item";
   }
@@ -107,34 +108,34 @@ export function RentalCard({
   switch (rental.status) {
     case "REQUESTED":
       if (isOwner) {
-        actions.push({ label: "Accept", action: "accept", primary: true });
-        actions.push({ label: "Counter offer", action: "counter" });
-        actions.push({ label: "Reject", action: "reject", danger: true });
+        actions.push({ label: "Approve", action: "accept", primary: true });
+        actions.push({ label: "Negotiate price", action: "counter" });
+        actions.push({ label: "Decline", action: "reject", danger: true });
       } else {
-        actions.push({ label: "Cancel request", action: "cancel", danger: true });
+        actions.push({ label: "Withdraw request", action: "cancel", danger: true });
       }
       break;
     case "NEGOTIATING":
       if (!isOwner) {
-        actions.push({ label: "Accept offer", action: "accept", primary: true });
-        actions.push({ label: "Cancel", action: "cancel", danger: true });
+        actions.push({ label: "Accept counter offer", action: "accept", primary: true });
+        actions.push({ label: "Withdraw request", action: "cancel", danger: true });
       } else {
-        actions.push({ label: "Retract offer", action: "reject", danger: true });
+        actions.push({ label: "Withdraw offer", action: "reject", danger: true });
       }
       break;
     case "ACCEPTED":
       if (isOwner) {
-        actions.push({ label: "Mark as complete", action: "complete", primary: true });
+        actions.push({ label: "Confirm pickup", action: "start", primary: true });
       }
-      actions.push({ label: "Cancel", action: "cancel", danger: true });
+      actions.push({ label: "Cancel booking", action: "cancel", danger: true });
       break;
     case "ACTIVE":
       if (isOwner) {
-        actions.push({ label: "Mark as complete", action: "complete", primary: true });
+        actions.push({ label: "Confirm return", action: "complete", primary: true });
       }
       break;
     case "COMPLETED":
-      actions.push({ label: "Leave a review", action: "review", primary: true });
+      actions.push({ label: "Rate this rental", action: "review", primary: true });
       break;
     default:
       break;

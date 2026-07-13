@@ -277,12 +277,48 @@ async function cancelRental(id, userId) {
   return updated;
 }
 
+async function startRental(id, userId) {
+  const rental = await getRentalById(id);
+
+  if (rental.owner_id !== userId) {
+    throw new AppError('Only the owner can confirm pickup and start this rental', 403);
+  }
+  if (rental.status !== RENTAL_STATUS.ACCEPTED) {
+    throw new AppError(`Cannot start a rental with status ${rental.status}`, 400);
+  }
+
+  const { data: updated, error } = await supabase
+    .from('rentals')
+    .update({ status: RENTAL_STATUS.ACTIVE, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new AppError('Failed to start rental', 500);
+  }
+
+  await notificationService.createNotification({
+    userId: rental.borrower_id,
+    title: 'Rental Started',
+    message: 'The owner confirmed pickup — your rental is now active.',
+    type: NOTIFICATION_TYPE.ACTIVE,
+  });
+
+  return updated;
+}
+
 async function completeRental(id, userId) {
   const rental = await getRentalById(id);
   assertParticipant(rental, userId);
 
-  if (![RENTAL_STATUS.ACCEPTED, RENTAL_STATUS.ACTIVE].includes(rental.status)) {
-    throw new AppError(`Cannot complete a rental with status ${rental.status}`, 400);
+  if (rental.status !== RENTAL_STATUS.ACTIVE) {
+    throw new AppError(
+      rental.status === RENTAL_STATUS.ACCEPTED
+        ? 'Confirm pickup to start the rental before marking it complete'
+        : `Cannot complete a rental with status ${rental.status}`,
+      400,
+    );
   }
 
   const { data: updated, error } = await supabase
@@ -370,6 +406,7 @@ module.exports = {
   acceptOffer,
   rejectOffer,
   cancelRental,
+  startRental,
   completeRental,
   getRentalHistory,
 };

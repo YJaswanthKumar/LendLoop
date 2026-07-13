@@ -943,7 +943,8 @@ Base Route
 | PATCH | /:id/accept | Yes | Accept Request |
 | PATCH | /:id/reject | Yes | Reject Request |
 | PATCH | /:id/cancel | Yes | Cancel Rental |
-| PATCH | /:id/complete | Yes | Complete Rental |
+| PATCH | /:id/start | Yes | Confirm Pickup (owner only, ACCEPTED → ACTIVE) |
+| PATCH | /:id/complete | Yes | Confirm Return / Complete Rental (ACTIVE → COMPLETED) |
 
 ---
 
@@ -1050,9 +1051,15 @@ Cancel rental.
 
 ---
 
+## PATCH /api/rentals/:id/start
+
+Owner confirms pickup/handover, moving the rental from `ACCEPTED` to `ACTIVE`. Only the rental's owner may call this. A rental cannot be marked complete until it has been started — this prevents marking a rental complete before the item was ever handed over.
+
+---
+
 ## PATCH /api/rentals/:id/complete
 
-Marks rental as completed.
+Owner or borrower confirms the item was returned, marking the rental as completed. Only allowed once the rental is `ACTIVE`.
 
 Updates
 

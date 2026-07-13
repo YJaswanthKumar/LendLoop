@@ -8,7 +8,7 @@ import { Loader } from "@/components/Loader";
 import { RentalCard, type RentalAction } from "@/components/RentalCard";
 import { ReviewModal } from "@/components/ReviewModal";
 import { useAuth } from "@/context/AuthContext";
-import { cancelRental, completeRental, rentalHistory } from "@/services/rentalService";
+import { cancelRental, completeRental, rentalHistory, startRental } from "@/services/rentalService";
 import { enrichRentalsWithAssets } from "@/utils/enrichRentals";
 import type { Rental } from "@/utils/types";
 
@@ -63,12 +63,15 @@ function HistoryPage() {
     }
     setBusyId(rental.id);
     try {
-      if (action === "complete") {
+      if (action === "start") {
+        await startRental(rental.id);
+        toast.success("Pickup confirmed — rental started");
+      } else if (action === "complete") {
         await completeRental(rental.id);
-        toast.success("Rental completed");
+        toast.success("Return confirmed — rental completed");
       } else if (action === "cancel") {
         await cancelRental(rental.id);
-        toast.success("Rental cancelled");
+        toast.success("Booking cancelled");
       }
       await load();
     } catch (err) {

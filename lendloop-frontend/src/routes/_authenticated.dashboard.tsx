@@ -79,8 +79,8 @@ function DashboardPage() {
   const stats = [
     { icon: Boxes, label: "Assets listed", value: overview?.totalAssets ?? 0 },
     { icon: HandCoins, label: "Rentals completed", value: overview?.rentalsCompleted ?? 0 },
-    { icon: Clock, label: "Active rentals", value: overview?.activeRentals ?? 0 },
-    { icon: TrendingUp, label: "Pending requests", value: overview?.pendingRequests ?? 0 },
+    { icon: Clock, label: "Rentals in progress", value: overview?.activeRentals ?? 0 },
+    { icon: TrendingUp, label: "Requests awaiting response", value: overview?.pendingRequests ?? 0 },
     { icon: ShieldCheck, label: "Trust score", value: overview?.trustScore ?? 0 },
     {
       icon: Star,

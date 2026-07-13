@@ -90,10 +90,10 @@ function AssetDetailsPage() {
   const requestButtonContent = () => {
     if (existingRental) {
       const labels: Record<string, string> = {
-        REQUESTED: "Request pending approval",
-        NEGOTIATING: "Negotiating — check Requests",
-        ACCEPTED: "Rental accepted — check Requests",
-        ACTIVE: "Rental active — check Requests",
+        REQUESTED: "Request pending owner approval",
+        NEGOTIATING: "Owner sent a counter offer — check Requests",
+        ACCEPTED: "Booking confirmed — check Requests",
+        ACTIVE: "Rental in progress — check Requests",
       };
       return labels[existingRental.status] ?? "Already requested";
     }

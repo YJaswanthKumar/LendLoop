@@ -21,6 +21,7 @@ router.patch('/:id/counter-offer', counterOfferValidator, validate, rentalContro
 router.patch('/:id/accept', acceptOfferValidator, validate, rentalController.acceptOffer);
 router.patch('/:id/reject', rentalIdValidator, validate, rentalController.rejectOffer);
 router.patch('/:id/cancel', rentalIdValidator, validate, rentalController.cancelRental);
+router.patch('/:id/start', rentalIdValidator, validate, rentalController.startRental);
 router.patch('/:id/complete', rentalIdValidator, validate, rentalController.completeRental);
 
 module.exports = router;

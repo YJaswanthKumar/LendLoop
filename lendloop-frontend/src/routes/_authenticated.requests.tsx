@@ -16,6 +16,7 @@ import {
   completeRental,
   rejectRental,
   rentalHistory,
+  startRental,
 } from "@/services/rentalService";
 import { enrichRentalsWithAssets } from "@/utils/enrichRentals";
 import type { Rental } from "@/utils/types";
@@ -77,16 +78,19 @@ function RequestsPage() {
     try {
       if (action === "accept") {
         await acceptRental(rental.id);
-        toast.success("Offer accepted 🎉");
+        toast.success("Booking confirmed 🎉");
       } else if (action === "reject") {
         await rejectRental(rental.id);
-        toast.success("Request rejected");
+        toast.success("Request declined");
       } else if (action === "cancel") {
         await cancelRental(rental.id);
-        toast.success("Request cancelled");
+        toast.success("Request withdrawn");
+      } else if (action === "start") {
+        await startRental(rental.id);
+        toast.success("Pickup confirmed — rental started");
       } else if (action === "complete") {
         await completeRental(rental.id);
-        toast.success("Rental completed");
+        toast.success("Return confirmed — rental completed");
       }
       await load();
     } catch (err) {
@@ -100,9 +104,9 @@ function RequestsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-extrabold tracking-tight">Rental requests</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight">Requests</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Accept, reject or negotiate offers on your items.
+        Review requests on your items and track the ones you've sent.
       </p>
 
       <div className="mt-5 flex gap-2">
@@ -110,13 +114,13 @@ function RequestsPage() {
           onClick={() => setTab("incoming")}
           className={tab === "incoming" ? "btn-primary px-5 py-2 text-sm" : "btn-outline px-5 py-2 text-sm"}
         >
-          <Inbox className="h-4 w-4" /> Incoming ({incoming.length})
+          <Inbox className="h-4 w-4" /> Received ({incoming.length})
         </button>
         <button
           onClick={() => setTab("outgoing")}
           className={tab === "outgoing" ? "btn-primary px-5 py-2 text-sm" : "btn-outline px-5 py-2 text-sm"}
         >
-          <Send className="h-4 w-4" /> Outgoing ({outgoing.length})
+          <Send className="h-4 w-4" /> Sent ({outgoing.length})
         </button>
       </div>
 
@@ -127,10 +131,10 @@ function RequestsPage() {
           <ErrorState message={error} onRetry={load} />
         ) : list.length === 0 ? (
           <EmptyState
-            title={tab === "incoming" ? "No incoming requests" : "No outgoing requests"}
+            title={tab === "incoming" ? "No requests received yet" : "No requests sent yet"}
             description={
               tab === "incoming"
-                ? "When someone requests your items, they'll show up here."
+                ? "When someone requests one of your items, it'll show up here."
                 : "Browse items and send your first rental request."
             }
           />

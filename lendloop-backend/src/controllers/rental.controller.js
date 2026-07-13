@@ -46,6 +46,15 @@ async function cancelRental(req, res, next) {
   }
 }
 
+async function startRental(req, res, next) {
+  try {
+    const rental = await rentalService.startRental(req.params.id, req.user.id);
+    return success(res, 200, 'Rental started successfully', { rental });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function completeRental(req, res, next) {
   try {
     const rental = await rentalService.completeRental(req.params.id, req.user.id);
@@ -79,6 +88,7 @@ module.exports = {
   acceptOffer,
   rejectOffer,
   cancelRental,
+  startRental,
   completeRental,
   getRentalHistory,
   getRentalDetails,

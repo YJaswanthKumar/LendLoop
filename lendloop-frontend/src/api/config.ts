@@ -35,6 +35,7 @@ export const ENDPOINTS = {
     accept: (id: string) => `/api/rentals/${id}/accept`,
     reject: (id: string) => `/api/rentals/${id}/reject`,
     cancel: (id: string) => `/api/rentals/${id}/cancel`,
+    start: (id: string) => `/api/rentals/${id}/start`,
     complete: (id: string) => `/api/rentals/${id}/complete`,
   },
   reviews: {

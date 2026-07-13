@@ -54,6 +54,11 @@ export async function cancelRental(id: string) {
   return res.data.data.rental;
 }
 
+export async function startRental(id: string) {
+  const res = await api.patch<ApiEnvelope<{ rental: Rental }>>(ENDPOINTS.rentals.start(id));
+  return res.data.data.rental;
+}
+
 export async function completeRental(id: string) {
   const res = await api.patch<ApiEnvelope<{ rental: Rental }>>(ENDPOINTS.rentals.complete(id));
   return res.data.data.rental;
