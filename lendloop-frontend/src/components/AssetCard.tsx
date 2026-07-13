@@ -44,9 +44,9 @@ export function AssetCard({ asset }: { asset: Asset }) {
         {(asset.city || asset.distance_km != null) && (
           <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="h-3 w-3" />
-            {asset.distance_km != null
+            {asset.distance_km != null && Number(asset.distance_km) >= 0.1
               ? `${Number(asset.distance_km).toFixed(1)} km away`
-              : asset.city}
+              : (asset.city ?? "Nearby")}
           </p>
         )}
         <div className="mt-3 flex items-baseline justify-between">

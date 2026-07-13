@@ -66,8 +66,12 @@ export function LeafletMapView({
               )}
               <div style={{ fontWeight: 700, fontSize: 14 }}>{a.title}</div>
               <div style={{ fontSize: 13, color: "#555", marginTop: 2 }}>{formatPrice(a.expected_price_per_day)} / day</div>
-              {a.distance_km != null && (
-                <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>{Number(a.distance_km).toFixed(1)} km away</div>
+              {(a.distance_km != null || a.city) && (
+                <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+                  {a.distance_km != null && Number(a.distance_km) >= 0.1
+                    ? `${Number(a.distance_km).toFixed(1)} km away`
+                    : (a.city ?? "Nearby")}
+                </div>
               )}
               <button
                 onClick={() => onAssetClick(a.id)}
