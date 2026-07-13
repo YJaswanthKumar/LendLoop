@@ -1623,51 +1623,56 @@ Frontend (Vercel)               Backend (Render)
 
 # Environment Variables
 
-## Backend
+## Backend (`lendloop-backend/.env`)
 
 | Variable | Purpose |
 |----------|----------|
-| PORT | Server Port |
-| NODE_ENV | Runtime Environment |
-| SUPABASE_URL | Supabase Project URL |
-| SUPABASE_SERVICE_ROLE_KEY | Supabase Service Role Key |
-| JWT_SECRET | JWT Secret |
-| JWT_EXPIRES_IN | Token Expiry |
-| CLIENT_URL | Frontend URL |
+| PORT | Server port (default `3001`) |
+| NODE_ENV | Runtime environment |
+| SUPABASE_URL | Supabase project URL |
+| SUPABASE_SERVICE_ROLE_KEY | Supabase service role key (secret) |
+| JWT_SECRET | JWT signing secret (secret, generated) |
+| JWT_EXPIRES_IN | Token expiry (e.g. `7d`) |
+| CLIENT_URL | Frontend URL, for CORS |
+
+## Frontend (`lendloop-frontend/.env`)
+
+| Variable | Purpose |
+|----------|----------|
+| FRONTEND_PORT | Port this app listens on (default `5000`) |
+| BACKEND_PORT | Port the backend listens on, used to build the built-in `/api` proxy (default `3001`) |
+| VITE_API_BASE_URL | Only needed if the backend isn't reachable via the built-in proxy (e.g. deployed separately) |
+| VITE_GOOGLE_MAPS_API_KEY | Optional — leave empty to use the built-in Leaflet/OpenStreetMap map with no key required |
 
 ---
 
 # Installation Guide
 
-## Backend
+This project runs entirely on your own machine or any standard Node.js host — no platform-specific services required beyond a Supabase project for the database.
+
+**See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the full, detailed, step-by-step local setup and deployment guide** (cloning, environment variables, generating secrets, running both servers, changing ports, troubleshooting, and production builds).
+
+Quick start (see DEPLOYMENT.md for details):
 
 ```bash
 git clone <repository-url>
+cd LendLoop
+npm run install:all
 
-cd lendloop-backend
+cp lendloop-backend/.env.example lendloop-backend/.env
+cp lendloop-frontend/.env.example lendloop-frontend/.env
+# edit both .env files with your Supabase project + a generated JWT secret
 
-npm install
-
-cp .env.example .env
-
-npm run dev
+npm run dev   # runs backend (port 3001) and frontend (port 5000) together
 ```
 
----
-
-## Frontend
-
-```bash
-cd lendloop-frontend
-
-npm install
-
-npm run dev
-```
+Then open `http://localhost:5000` in your browser.
 
 ---
 
 # Deployment
+
+This is a standard Node.js + Express backend and a Node.js (TanStack Start/Nitro) frontend — deploy them anywhere that runs Node.js. Historically this project was deployed with:
 
 ## Frontend
 
@@ -1680,6 +1685,16 @@ npm run dev
 ## Database
 
 - Supabase PostgreSQL
+
+Full step-by-step setup, environment variable reference, and troubleshooting live in [`DEPLOYMENT.md`](./DEPLOYMENT.md).
+
+---
+
+# Development Notes
+
+- **Contact/pickup visibility**: rental endpoints (`GET /api/rentals/history`, `GET /api/rentals/:id`) only include `owner_contact` / `borrower_contact` once a rental's status is `ACCEPTED`, `ACTIVE`, or `COMPLETED`. The borrower's view of the owner's contact includes `latitude`/`longitude` (for an "open in Google Maps" link); the owner's view of the borrower's contact does not. See `CONTACT_LOCATION_IMPLEMENTATION.md` for details.
+- **Maps**: the app uses Leaflet + OpenStreetMap for the interactive map and location picker, not the Google Maps JS API — no map API key is required.
+- **Rental lifecycle**: a rental only becomes completable after the owner explicitly confirms pickup (`PATCH /api/rentals/:id/start`, `ACCEPTED → ACTIVE`). This prevents marking a rental "complete" before the item was ever handed over. See the Rental Status Lifecycle section above.
 
 ---
 

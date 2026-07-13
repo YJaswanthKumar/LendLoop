@@ -1,4 +1,0 @@
-- [Replit fullstack CORS fix via Nitro proxy](replit-fullstack-cors.md) — Nitro routeRules proxy is the only reliable way to connect a separate Express backend in Replit dev; Vite proxy and direct cross-port browser calls both fail.
-- [Leaflet SSR fix](leaflet-ssr.md) — Leaflet crashes SSR ("window is not defined"); split into an inner component file and dynamic-import it inside useEffect so it only loads client-side.
-- [Notification badge refresh pattern](notification-badge.md) — Navbar polls every 30s; mark-read pages dispatch custom event `lendloop:notification-read` so the Navbar re-fetches unread count immediately.
-- [LendLoop backend needs restart after code edits](lendloop-backend-restart.md) — `npm start` runs plain `node`, no watch/reload; edits to rental/service files are invisible until the Backend API workflow is restarted.

@@ -11,7 +11,9 @@ for (const key of required) {
 }
 
 module.exports = {
-  port: process.env.PORT || 5000,
+  // Default to 3001 so it doesn't collide with the frontend's default port (5000).
+  // Override with PORT in .env to run on 3000, 8080, or any other port.
+  port: process.env.PORT || 3001,
   nodeEnv: process.env.NODE_ENV || 'development',
   supabaseUrl: process.env.SUPABASE_URL,
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,

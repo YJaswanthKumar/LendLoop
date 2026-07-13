@@ -1,14 +1,18 @@
 /**
  * Central API configuration — ALL backend URLs derive from here.
  *
- * Server-side (SSR): talk directly to the backend on localhost:3001.
- * Client-side (browser): use VITE_API_BASE_URL (the public Replit dev-domain
- * URL for the backend port) so the browser can reach the backend through
- * Replit's proxy.
+ * Server-side (SSR): talk directly to the backend on localhost, using the
+ * same port the backend is configured to listen on (BACKEND_PORT, default
+ * 3001 — see lendloop-backend/.env).
+ * Client-side (browser): requests go to relative "/api/..." URLs by default,
+ * which the frontend's own dev/prod server proxies through to the backend
+ * (see vite.config.ts routeRules). Set VITE_API_BASE_URL only if the backend
+ * is reachable at a different host/port than the built-in proxy target.
  */
 const isServer = typeof window === "undefined";
+const backendPort = (import.meta.env.VITE_BACKEND_PORT as string | undefined) ?? "3001";
 export const API_BASE_URL: string = isServer
-  ? "http://localhost:3001"
+  ? `http://localhost:${backendPort}`
   : (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
 
 

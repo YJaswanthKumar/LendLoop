@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Environment variables (never commit real secrets/keys)
+.env
+.env.*
+!.env.example
+
+# Build output
+lendloop-frontend/dist/
+lendloop-frontend/.output/
+lendloop-frontend/.vinxi/
+lendloop-frontend/.nitro/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Replit / AI-agent workspace metadata — not part of the application,
+# not needed to run or deploy this project.
+.replit
+replit.md
+.agents/
+.cache/
+.local/
+.upm/
