@@ -2,7 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   CalendarDays,
   ChevronLeft,
+  Mail,
   MapPin,
+  Phone,
   ShieldCheck,
   Star,
   Tag,
@@ -217,6 +219,8 @@ function AssetDetailsPage() {
               )}
             </div>
           </div>
+
+          <OwnerPickupCard rental={existingRental} />
         </div>
       </div>
 
@@ -230,6 +234,53 @@ function AssetDetailsPage() {
           navigate({ to: "/requests" });
         }}
       />
+    </div>
+  );
+}
+
+function OwnerPickupCard({ rental }: { rental: Rental | null }) {
+  const contact = rental?.owner_contact;
+  if (!contact) return null;
+
+  const hasLocation = contact.latitude != null && contact.longitude != null;
+  const mapsUrl = hasLocation
+    ? `https://www.google.com/maps?q=${contact.latitude},${contact.longitude}`
+    : null;
+
+  return (
+    <div className="card-elevated mt-4 p-5">
+      <h2 className="font-bold">Owner information</h2>
+      <p className="mt-0.5 text-xs text-muted-foreground">
+        Your request was accepted — here's how to reach the owner and pick up the item.
+      </p>
+      <div className="mt-3 space-y-2 text-sm">
+        <p className="font-semibold">{contact.full_name}</p>
+        {contact.phone && (
+          <p className="flex items-center gap-2 text-muted-foreground">
+            <Phone className="h-4 w-4 shrink-0" /> {contact.phone}
+          </p>
+        )}
+        <p className="flex items-center gap-2 text-muted-foreground">
+          <Mail className="h-4 w-4 shrink-0" /> {contact.email}
+        </p>
+        {(contact.city || contact.state) && (
+          <p className="flex items-center gap-2 text-muted-foreground">
+            <MapPin className="h-4 w-4 shrink-0" />
+            {[contact.city, contact.state].filter(Boolean).join(", ")}
+          </p>
+        )}
+      </div>
+      {mapsUrl && (
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="btn-outline mt-4 flex w-full items-center justify-center gap-2 py-2.5 text-sm font-semibold"
+        >
+          <MapPin className="h-4 w-4" />
+          Open pickup location in Google Maps
+        </a>
+      )}
     </div>
   );
 }
