@@ -85,6 +85,7 @@ LendLoop addresses this problem by providing a centralized platform where commun
 - Cancel Rental
 - Complete Rental
 - Rental History
+- Owner/Borrower Contact & Pickup Location Reveal (visible only after acceptance)
 
 ### Reviews
 - Submit Review
@@ -937,6 +938,7 @@ Base Route
 |----------|------------|----------------|----------|
 | POST | / | Yes | Create Rental Request |
 | GET | /history | Yes | Rental History |
+| GET | /:id | Yes | Rental Details (owner/borrower only) |
 | PATCH | /:id/counter-offer | Yes | Counter Offer |
 | PATCH | /:id/accept | Yes | Accept Request |
 | PATCH | /:id/reject | Yes | Reject Request |
@@ -974,6 +976,42 @@ page
 
 limit
 ```
+
+---
+
+## GET /api/rentals/:id
+
+Returns details for a single rental. Only the rental's owner or borrower may access it (403 otherwise).
+
+While the rental is `REQUESTED` or `NEGOTIATING`, only public rental data is returned.
+
+Once the rental status becomes `ACCEPTED`, `ACTIVE`, or `COMPLETED`, the response is enriched with:
+
+```json
+{
+    "rental": {
+        "...": "...",
+        "owner_contact": {
+            "full_name": "...",
+            "email": "...",
+            "phone": "...",
+            "city": "...",
+            "state": "...",
+            "latitude": 17.385,
+            "longitude": 78.4867
+        },
+        "borrower_contact": {
+            "full_name": "...",
+            "email": "...",
+            "phone": "...",
+            "city": "...",
+            "state": "..."
+        }
+    }
+}
+```
+
+`owner_contact` includes pickup coordinates (`latitude`/`longitude`) so the borrower can open the location in Google Maps (`https://www.google.com/maps?q=<latitude>,<longitude>`); `borrower_contact` does not, since there is no pickup location on the borrower's side. `GET /api/rentals/history` applies the same enrichment to each rental in the list. See `CONTACT_LOCATION_IMPLEMENTATION.md` for full implementation details.
 
 ---
 
@@ -1519,6 +1557,8 @@ The application incorporates several security mechanisms to protect user account
 - Owner-only Asset Updates
 - Owner-only Asset Deletion
 - Protected Rental Operations
+- Rental Details Restricted to Rental Owner/Borrower
+- Contact Info & Pickup Location Hidden Until Rental Is Accepted
 
 ### Validation
 
