@@ -2,6 +2,30 @@ const supabase = require('../config/supabase');
 const { AppError } = require('../middleware/error.middleware');
 const { getPagination, buildPaginationMeta, haversineDistanceKm } = require('../utils/helpers');
 const { ASSET_AVAILABILITY } = require('../utils/constants');
+const { logActivity, ACTIVITY_TYPE } = require('./activity.service');
+
+// The `admin_hidden` column is added by the admin migration.
+// If it doesn't exist yet, public asset endpoints should still work.
+let adminHiddenColumnAvailable = null;
+
+async function isAdminHiddenColumnAvailable() {
+  if (adminHiddenColumnAvailable !== null) return adminHiddenColumnAvailable;
+
+  const { error } = await supabase
+    .from('assets')
+    .select('admin_hidden')
+    .limit(1);
+
+  adminHiddenColumnAvailable = !error;
+
+  if (error) {
+    console.warn(
+      'admin_hidden column not found. Admin hide filtering disabled.'
+    );
+  }
+
+  return adminHiddenColumnAvailable;
+}
 
 async function createAsset(ownerId, payload) {
   const {
@@ -63,6 +87,15 @@ async function createAsset(ownerId, payload) {
   // Keep the owner's total_assets counter in sync
   await incrementUserAssetCount(ownerId, 1);
 
+  logActivity({
+  type: ACTIVITY_TYPE.ASSET_LISTED,
+  message: `New asset listed: "${asset.title}"`,
+  userId: ownerId,
+  meta: {
+    assetId: asset.id,
+  },
+});
+
   return asset;
 }
 
@@ -84,7 +117,14 @@ async function getAssets(query) {
   const { page, limit, from, to } = getPagination(query);
   const { category, city, minPrice, maxPrice, availabilityStatus } = query;
 
-  let builder = supabase.from('assets').select('*', { count: 'exact' }).eq('is_active', true);
+  let builder = supabase
+    .from('assets')
+    .select('*', { count: 'exact' })
+    .eq('is_active', true);
+
+if (await isAdminHiddenColumnAvailable()) {
+    builder = builder.eq('admin_hidden', false);
+}
 
   if (category) builder = builder.eq('category', category);
   if (city) builder = builder.ilike('city', `%${city}%`);
@@ -184,6 +224,15 @@ async function deleteAsset(id, ownerId) {
 
   await incrementUserAssetCount(ownerId, -1);
 
+  logActivity({
+  type: ACTIVITY_TYPE.ASSET_DELETED,
+  message: `Asset "${existing.title}" was deleted`,
+  userId: ownerId,
+  meta: {
+    assetId: id,
+  },
+});
+
   return true;
 }
 
@@ -193,13 +242,19 @@ async function getNearbyAssets(query) {
   const longitude = parseFloat(query.longitude);
   const radiusKm = query.radiusKm ? parseFloat(query.radiusKm) : 25;
 
-  const { data, error } = await supabase
+  let nearbyBuilder = supabase
     .from('assets')
     .select('*')
     .eq('is_active', true)
     .eq('availability_status', ASSET_AVAILABILITY.AVAILABLE)
     .not('latitude', 'is', null)
     .not('longitude', 'is', null);
+
+if (await isAdminHiddenColumnAvailable()) {
+    nearbyBuilder = nearbyBuilder.eq('admin_hidden', false);
+}
+
+const { data, error } = await nearbyBuilder;
 
   if (error) {
     throw new AppError('Failed to fetch nearby assets', 500);
@@ -226,13 +281,21 @@ async function searchAssets(query) {
   const { page, limit, from, to } = getPagination(query);
   const q = query.q;
 
-  const { data, error, count } = await supabase
+  let searchBuilder = supabase
     .from('assets')
     .select('*', { count: 'exact' })
-    .eq('is_active', true)
+    .eq('is_active', true);
+
+if (await isAdminHiddenColumnAvailable()) {
+    searchBuilder = searchBuilder.eq('admin_hidden', false);
+}
+
+searchBuilder = searchBuilder
     .or(`title.ilike.%${q}%,description.ilike.%${q}%,category.ilike.%${q}%,brand.ilike.%${q}%`)
     .order('created_at', { ascending: false })
     .range(from, to);
+
+const { data, error, count } = await searchBuilder;
 
   if (error) {
     throw new AppError('Failed to search assets', 500);

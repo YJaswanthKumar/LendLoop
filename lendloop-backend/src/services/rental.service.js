@@ -1,5 +1,8 @@
 const supabase = require('../config/supabase');
 const { AppError } = require('../middleware/error.middleware');
+
+const { logActivity, ACTIVITY_TYPE } = require('./activity.service');
+
 const {
   getPagination,
   buildPaginationMeta,
@@ -137,6 +140,16 @@ async function createRentalRequest(borrowerId, payload) {
     type: NOTIFICATION_TYPE.REQUEST,
   });
 
+  logActivity({
+  type: ACTIVITY_TYPE.RENTAL_REQUESTED,
+  message: `A rental was requested for "${asset.title}"`,
+  userId: borrowerId,
+  meta: {
+    rentalId: rental.id,
+    assetId: asset.id,
+  },
+});
+
   return rental;
 }
 
@@ -221,6 +234,15 @@ async function acceptOffer(id, userId, payload) {
     message: 'Your rental offer has been accepted.',
     type: NOTIFICATION_TYPE.ACCEPTED,
   });
+
+  logActivity({
+  type: ACTIVITY_TYPE.RENTAL_APPROVED,
+  message: 'A rental offer was accepted',
+  userId,
+  meta: {
+    rentalId: id,
+  },
+});
 
   return updated;
 }
@@ -483,6 +505,15 @@ async function completeRental(id, userId) {
     message: 'A rental has been marked as completed.',
     type: NOTIFICATION_TYPE.COMPLETED,
   });
+
+  logActivity({
+  type: ACTIVITY_TYPE.RENTAL_COMPLETED,
+  message: 'A rental was completed',
+  userId,
+  meta: {
+    rentalId: id,
+  },
+});
 
   return updated;
 }

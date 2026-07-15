@@ -4,6 +4,8 @@ const { getPagination, buildPaginationMeta } = require('../utils/helpers');
 const { RENTAL_STATUS } = require('../utils/constants');
 const rentalService = require('./rental.service');
 
+const { logActivity, ACTIVITY_TYPE } = require('./activity.service');
+
 async function recalculateAverageRating(userId) {
   const { data: reviews, error } = await supabase.from('reviews').select('rating').eq('receiver_id', userId);
 
@@ -67,6 +69,17 @@ async function createReview(reviewerId, payload) {
 
   await recalculateAverageRating(receiverId);
 
+  logActivity({
+  type: ACTIVITY_TYPE.REVIEW_SUBMITTED,
+  message: 'A review was submitted',
+  userId: reviewerId,
+  meta: {
+    reviewId: newReview.id,
+    rentalId,
+    receiverId,
+  },
+});
+
   return newReview;
 }
 
@@ -101,4 +114,8 @@ async function getReviewsForUser(userId, query) {
   };
 }
 
-module.exports = { createReview, getReviewsForUser };
+module.exports = {
+  createReview,
+  getReviewsForUser,
+  recalculateAverageRating,
+};

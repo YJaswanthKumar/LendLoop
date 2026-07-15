@@ -2,6 +2,7 @@ const bcryptjs = require('bcryptjs');
 const supabase = require('../config/supabase');
 const { AppError } = require('../middleware/error.middleware');
 const { generateToken, sanitizeUser } = require('../utils/helpers');
+const { logActivity, ACTIVITY_TYPE } = require('./activity.service');
 
 const SALT_ROUNDS = 10;
 
@@ -45,6 +46,12 @@ async function register(payload) {
 
   const token = generateToken({ id: newUser.id, email: newUser.email });
 
+  logActivity({
+    type: ACTIVITY_TYPE.USER_REGISTERED,
+    message: `${newUser.full_name} registered a new account`,
+    userId: newUser.id,
+  });
+
   return { user: sanitizeUser(newUser), token };
 }
 
@@ -71,6 +78,12 @@ async function login(email, password) {
   }
 
   const token = generateToken({ id: user.id, email: user.email });
+
+  logActivity({
+    type: ACTIVITY_TYPE.USER_LOGIN,
+    message: `${user.full_name} logged in`,
+    userId: user.id,
+  });
 
   return { user: sanitizeUser(user), token };
 }
