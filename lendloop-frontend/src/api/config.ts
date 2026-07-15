@@ -63,4 +63,18 @@ export const ENDPOINTS = {
     ids: "/api/wishlist/ids",
     byAssetId: (assetId: string) => `/api/wishlist/${assetId}`,
   },
+  admin: {
+    overview: "/api/admin/overview",
+    analytics: "/api/admin/analytics",
+    activity: "/api/admin/activity",
+    users: "/api/admin/users",
+    userDetail: (userId: string) => `/api/admin/users/${userId}`,
+    userStatus: (userId: string) => `/api/admin/users/${userId}/status`,
+    assets: "/api/admin/assets",
+    assetHidden: (assetId: string) => `/api/admin/assets/${assetId}/hidden`,
+    assetRemove: (assetId: string) => `/api/admin/assets/${assetId}`,
+    rentals: "/api/admin/rentals",
+    reviews: "/api/admin/reviews",
+    reviewDelete: (reviewId: string) => `/api/admin/reviews/${reviewId}`,
+  },
 } as const;

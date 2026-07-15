@@ -47,14 +47,17 @@ export function AssetCard({ asset }: { asset: Asset }) {
         <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {asset.category}
         </p>
-        {(asset.city || asset.distance_km != null) && (
-          <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3" />
-            {asset.distance_km != null && Number(asset.distance_km) >= 0.1
-              ? `${Number(asset.distance_km).toFixed(1)} km away`
-              : (asset.city ?? "Nearby")}
-          </p>
-        )}
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          {(asset.city || asset.distance_km != null) && (
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {asset.distance_km != null && Number(asset.distance_km) >= 0.1
+                ? `${Number(asset.distance_km).toFixed(1)} km away`
+                : (asset.city ?? "Nearby")}
+            </span>
+          )}
+          {asset.usage_count > 0 && <span>rented {asset.usage_count}×</span>}
+        </div>
         <div className="mt-3 flex items-baseline justify-between">
           <p className="text-base font-bold">
             {formatPrice(asset.expected_price_per_day)}

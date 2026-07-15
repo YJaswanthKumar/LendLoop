@@ -23,6 +23,7 @@ export type NotificationType =
 
 export type CancellationPolicy = "FLEXIBLE" | "MODERATE" | "STRICT";
 export type DepositStatus = "NONE" | "PENDING" | "HELD" | "REFUNDED" | "PARTIALLY_REFUNDED" | "FORFEITED";
+export type Presence = "ONLINE" | "RECENTLY_ACTIVE" | "OFFLINE";
 
 export interface User {
   id: string;
@@ -42,6 +43,8 @@ export interface User {
   total_assets: number;
   is_verified: boolean;
   is_active: boolean;
+  is_admin?: boolean;
+  last_seen?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -193,3 +196,78 @@ export const CATEGORIES = [
   "Furniture",
   "Other",
 ] as const;
+
+// ---------------------------------------------------------------------------
+// Admin portal
+// ---------------------------------------------------------------------------
+export interface AdminUser extends User {
+  presence: Presence;
+}
+
+export interface AdminOverview {
+  totalUsers: number;
+  activeUsers: number;
+  newUsersToday: number;
+  newUsersThisWeek: number;
+  loggedInUsers: number;
+  totalAssets: number;
+  availableAssets: number;
+  bookedAssets: number;
+  completedRentals: number;
+  activeRentals: number;
+  pendingRequests: number;
+  totalReviews: number;
+  averagePlatformRating: number;
+  totalDisputes: number;
+}
+
+export interface ActivityLog {
+  id: string;
+  type: string;
+  message: string;
+  user_id: string | null;
+  meta: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface AdminUserDetail {
+  user: AdminUser;
+  assetsListed: Asset[];
+  rentalsGiven: Rental[];
+  rentalsTaken: Rental[];
+  reviewsReceived: Review[];
+  reviewsGiven: Review[];
+  recentNotifications: AppNotification[];
+  stats: {
+    itemsListed: number;
+    itemsLent: number;
+    itemsBorrowed: number;
+    reviewCount: number;
+  };
+}
+
+export interface AdminAsset extends Asset {
+  admin_hidden?: boolean;
+  owner: { id: string; full_name: string; email: string } | null;
+}
+
+export interface AdminRental extends Omit<Rental, "asset"> {
+  owner: { id: string; full_name: string; email: string } | null;
+  borrower: { id: string; full_name: string; email: string } | null;
+  asset: { id: string; title: string; category: string } | null;
+}
+
+export interface AdminReview extends Review {
+  reviewer: { id: string; full_name: string; email: string } | null;
+  receiver: { id: string; full_name: string; email: string } | null;
+}
+
+export interface AdminAnalytics {
+  mostRentedCategories: { category: string; usage: number }[];
+  topRentedAssets: { id: string; title: string; usageCount: number; rating: number }[];
+  topOwners: { userId: string; name: string; assetsListed: number }[];
+  mostActiveBorrowers: { userId: string; name: string; rentalsMade: number }[];
+  newUsersByDay: { date: string; count: number }[];
+  rentalGrowthByDay: { date: string; count: number }[];
+  platformUsage: Record<string, number>;
+}

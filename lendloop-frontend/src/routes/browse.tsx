@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LocateFixed, SlidersHorizontal, Search as SearchIcon, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AssetCard } from "@/components/AssetCard";
+import { AssetCardSkeletonGrid } from "@/components/AssetCardSkeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
-import { Loader } from "@/components/Loader";
 import { Pagination } from "@/components/Pagination";
 import { getApiError } from "@/api/api";
 import { listAssets, nearbyAssets, searchAssets } from "@/services/assetService";
@@ -51,6 +51,7 @@ function BrowsePage() {
   const [maxPrice, setMaxPrice] = useState("");
   const [availability, setAvailability] = useState("");
   const [distance, setDistance] = useState("");
+  const [sort, setSort] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -247,6 +248,25 @@ function BrowsePage() {
   const hasFilters = category || minPrice || maxPrice || availability || distance;
   const mapCenter: [number, number] = [center.latitude, center.longitude];
 
+  const sortedAssets = useMemo(() => {
+    if (!sort) return assets;
+    const list = [...assets];
+    switch (sort) {
+      case "newest":
+        return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      case "most_rented":
+        return list.sort((a, b) => b.usage_count - a.usage_count);
+      case "highest_rated":
+        return list.sort((a, b) => Number(b.average_rating) - Number(a.average_rating));
+      case "price_asc":
+        return list.sort((a, b) => a.expected_price_per_day - b.expected_price_per_day);
+      case "price_desc":
+        return list.sort((a, b) => b.expected_price_per_day - a.expected_price_per_day);
+      default:
+        return list;
+    }
+  }, [assets, sort]);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="text-2xl font-extrabold tracking-tight">Browse items</h1>
@@ -275,6 +295,19 @@ function BrowsePage() {
           <SlidersHorizontal className="h-4 w-4" /> Filters
           {hasFilters && <span className="ml-1 h-2 w-2 rounded-full bg-primary" />}
         </button>
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          className="input-base sm:w-48"
+          aria-label="Sort results"
+        >
+          <option value="">Sort: Relevance</option>
+          <option value="newest">Recently added</option>
+          <option value="most_rented">Most rented</option>
+          <option value="highest_rated">Highest rated</option>
+          <option value="price_asc">Price: Low to high</option>
+          <option value="price_desc">Price: High to low</option>
+        </select>
         <button
           type="button"
           onClick={useMyLocation}
@@ -461,7 +494,7 @@ function BrowsePage() {
       {/* Results */}
       <div className="mt-6">
         {loading ? (
-          <Loader label="Finding items…" />
+          <AssetCardSkeletonGrid count={8} />
         ) : error ? (
           <ErrorState message={error} onRetry={fetchAssets} />
         ) : assets.length === 0 ? (
@@ -472,7 +505,7 @@ function BrowsePage() {
         ) : (
           <>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {assets.map((a) => (
+              {sortedAssets.map((a) => (
                 <AssetCard key={a.id} asset={a} />
               ))}
             </div>

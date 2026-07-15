@@ -13,15 +13,25 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as BrowseRouteImport } from './routes/browse'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AssetsAssetIdRouteImport } from './routes/assets.$assetId'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
+import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
+import { Route as AdminAssetsRouteImport } from './routes/admin.assets'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminActivityRouteImport } from './routes/admin.activity'
+import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated.wishlist'
 import { Route as AuthenticatedRequestsRouteImport } from './routes/_authenticated.requests'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated.notifications'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated.history'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedCreateAssetRouteImport } from './routes/_authenticated.create-asset'
+import { Route as AdminUsersUserIdRouteImport } from './routes/admin.users.$userId'
 import { Route as AuthenticatedEditAssetAssetIdRouteImport } from './routes/_authenticated.edit-asset.$assetId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -44,6 +54,11 @@ const BrowseRoute = BrowseRouteImport.update({
   path: '/browse',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -53,10 +68,50 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AssetsAssetIdRoute = AssetsAssetIdRouteImport.update({
   id: '/assets/$assetId',
   path: '/assets/$assetId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReviewsRoute = AdminReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRentalsRoute = AdminRentalsRouteImport.update({
+  id: '/rentals',
+  path: '/rentals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAssetsRoute = AdminAssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminActivityRoute = AdminActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AuthenticatedWishlistRoute = AuthenticatedWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedRequestsRoute = AuthenticatedRequestsRouteImport.update({
   id: '/requests',
@@ -90,6 +145,11 @@ const AuthenticatedCreateAssetRoute =
     path: '/create-asset',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
+  id: '/$userId',
+  path: '/$userId',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
 const AuthenticatedEditAssetAssetIdRoute =
   AuthenticatedEditAssetAssetIdRouteImport.update({
     id: '/edit-asset/$assetId',
@@ -99,6 +159,7 @@ const AuthenticatedEditAssetAssetIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -109,8 +170,17 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/requests': typeof AuthenticatedRequestsRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
+  '/admin/activity': typeof AdminActivityRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/assets': typeof AdminAssetsRoute
+  '/admin/rentals': typeof AdminRentalsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/assets/$assetId': typeof AssetsAssetIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/edit-asset/$assetId': typeof AuthenticatedEditAssetAssetIdRoute
+  '/admin/users/$userId': typeof AdminUsersUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -124,13 +194,23 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/requests': typeof AuthenticatedRequestsRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
+  '/admin/activity': typeof AdminActivityRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/assets': typeof AdminAssetsRoute
+  '/admin/rentals': typeof AdminRentalsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/assets/$assetId': typeof AssetsAssetIdRoute
+  '/admin': typeof AdminIndexRoute
   '/edit-asset/$assetId': typeof AuthenticatedEditAssetAssetIdRoute
+  '/admin/users/$userId': typeof AdminUsersUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -141,13 +221,23 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/requests': typeof AuthenticatedRequestsRoute
+  '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
+  '/admin/activity': typeof AdminActivityRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/assets': typeof AdminAssetsRoute
+  '/admin/rentals': typeof AdminRentalsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/assets/$assetId': typeof AssetsAssetIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/_authenticated/edit-asset/$assetId': typeof AuthenticatedEditAssetAssetIdRoute
+  '/admin/users/$userId': typeof AdminUsersUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/browse'
     | '/login'
     | '/register'
@@ -158,8 +248,17 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/requests'
+    | '/wishlist'
+    | '/admin/activity'
+    | '/admin/analytics'
+    | '/admin/assets'
+    | '/admin/rentals'
+    | '/admin/reviews'
+    | '/admin/users'
     | '/assets/$assetId'
+    | '/admin/'
     | '/edit-asset/$assetId'
+    | '/admin/users/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -173,12 +272,22 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/requests'
+    | '/wishlist'
+    | '/admin/activity'
+    | '/admin/analytics'
+    | '/admin/assets'
+    | '/admin/rentals'
+    | '/admin/reviews'
+    | '/admin/users'
     | '/assets/$assetId'
+    | '/admin'
     | '/edit-asset/$assetId'
+    | '/admin/users/$userId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin'
     | '/browse'
     | '/login'
     | '/register'
@@ -189,13 +298,23 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/profile'
     | '/_authenticated/requests'
+    | '/_authenticated/wishlist'
+    | '/admin/activity'
+    | '/admin/analytics'
+    | '/admin/assets'
+    | '/admin/rentals'
+    | '/admin/reviews'
+    | '/admin/users'
     | '/assets/$assetId'
+    | '/admin/'
     | '/_authenticated/edit-asset/$assetId'
+    | '/admin/users/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   BrowseRoute: typeof BrowseRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -233,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrowseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -247,12 +373,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/assets/$assetId': {
       id: '/assets/$assetId'
       path: '/assets/$assetId'
       fullPath: '/assets/$assetId'
       preLoaderRoute: typeof AssetsAssetIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reviews': {
+      id: '/admin/reviews'
+      path: '/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AdminReviewsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/rentals': {
+      id: '/admin/rentals'
+      path: '/rentals'
+      fullPath: '/admin/rentals'
+      preLoaderRoute: typeof AdminRentalsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/assets': {
+      id: '/admin/assets'
+      path: '/assets'
+      fullPath: '/admin/assets'
+      preLoaderRoute: typeof AdminAssetsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/activity': {
+      id: '/admin/activity'
+      path: '/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AdminActivityRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_authenticated/wishlist': {
+      id: '/_authenticated/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof AuthenticatedWishlistRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/requests': {
       id: '/_authenticated/requests'
@@ -296,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCreateAssetRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/admin/users/$userId': {
+      id: '/admin/users/$userId'
+      path: '/$userId'
+      fullPath: '/admin/users/$userId'
+      preLoaderRoute: typeof AdminUsersUserIdRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
     '/_authenticated/edit-asset/$assetId': {
       id: '/_authenticated/edit-asset/$assetId'
       path: '/edit-asset/$assetId'
@@ -313,6 +502,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
+  AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
   AuthenticatedEditAssetAssetIdRoute: typeof AuthenticatedEditAssetAssetIdRoute
 }
 
@@ -323,6 +513,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
+  AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
   AuthenticatedEditAssetAssetIdRoute: AuthenticatedEditAssetAssetIdRoute,
 }
 
@@ -330,9 +521,44 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface AdminUsersRouteChildren {
+  AdminUsersUserIdRoute: typeof AdminUsersUserIdRoute
+}
+
+const AdminUsersRouteChildren: AdminUsersRouteChildren = {
+  AdminUsersUserIdRoute: AdminUsersUserIdRoute,
+}
+
+const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
+  AdminUsersRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminActivityRoute: typeof AdminActivityRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminAssetsRoute: typeof AdminAssetsRoute
+  AdminRentalsRoute: typeof AdminRentalsRoute
+  AdminReviewsRoute: typeof AdminReviewsRoute
+  AdminUsersRoute: typeof AdminUsersRouteWithChildren
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminActivityRoute: AdminActivityRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminAssetsRoute: AdminAssetsRoute,
+  AdminRentalsRoute: AdminRentalsRoute,
+  AdminReviewsRoute: AdminReviewsRoute,
+  AdminUsersRoute: AdminUsersRouteWithChildren,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   BrowseRoute: BrowseRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,

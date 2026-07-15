@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Bell, Heart, Leaf, LogOut, Menu, Plus, User as UserIcon, X } from "lucide-react";
+import { Bell, Heart, Leaf, LogOut, Menu, Plus, ShieldCheck, User as UserIcon, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -78,6 +78,11 @@ export function Navbar() {
               <Link to="/history" className={navLink}>
                 Rentals
               </Link>
+              {user?.is_admin && (
+                <Link to="/admin" className={navLink}>
+                  Admin
+                </Link>
+              )}
             </>
           )}
         </nav>
@@ -132,6 +137,15 @@ export function Navbar() {
                     >
                       <UserIcon className="h-4 w-4" /> Profile
                     </Link>
+                    {user?.is_admin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted"
+                      >
+                        <ShieldCheck className="h-4 w-4" /> Admin portal
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-destructive hover:bg-muted"
@@ -214,6 +228,15 @@ export function Navbar() {
                 >
                   Rental history
                 </Link>
+                {user?.is_admin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
+                  >
+                    <ShieldCheck className="h-4 w-4" /> Admin portal
+                  </Link>
+                )}
                 <Link
                   to="/profile"
                   onClick={() => setOpen(false)}
