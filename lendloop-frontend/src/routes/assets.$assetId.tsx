@@ -1,0 +1,437 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  CalendarDays,
+  ChevronLeft,
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  Star,
+  Tag,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { getApiError } from "@/api/api";
+import { CancellationPolicyInfo } from "@/components/CancellationPolicyBadge";
+import { DepositSummary } from "@/components/DepositBadge";
+import { ErrorState } from "@/components/ErrorState";
+import { Loader } from "@/components/Loader";
+import { Modal } from "@/components/Modal";
+import { StatusBadge } from "@/components/StatusBadge";
+import { WishlistButton } from "@/components/WishlistButton";
+import { useAuth } from "@/context/AuthContext";
+import { getAsset } from "@/services/assetService";
+import { createRental, rentalHistory } from "@/services/rentalService";
+import { daysBetween, formatDate, formatPrice } from "@/utils/format";
+import { estimateRefundPercent } from "@/utils/cancellationPolicy";
+import type { Asset, Rental } from "@/utils/types";
+
+export const Route = createFileRoute("/assets/$assetId")({
+  head: () => ({
+    meta: [
+      { title: "Item details — LendLoop" },
+      { name: "description", content: "View item details, price and availability, and request a rental on LendLoop." },
+    ],
+  }),
+  component: AssetDetailsPage,
+});
+
+const ACTIVE_STATUSES = new Set(["REQUESTED", "NEGOTIATING", "ACCEPTED", "ACTIVE"]);
+
+function AssetDetailsPage() {
+  const { assetId } = Route.useParams();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const [asset, setAsset] = useState<Asset | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [existingRental, setExistingRental] = useState<Rental | null>(null);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    getAsset(assetId)
+      .then(setAsset)
+      .catch((err) => setError(getApiError(err)))
+      .finally(() => setLoading(false));
+  }, [assetId]);
+
+  useEffect(load, [load]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    rentalHistory({ role: "borrower", limit: 50 })
+      .then(({ rentals }) => {
+        const found = rentals.find(
+          (r) => r.asset_id === assetId && ACTIVE_STATUSES.has(r.status),
+        );
+        setExistingRental(found ?? null);
+      })
+      .catch(() => {});
+  }, [assetId, isAuthenticated]);
+
+  if (loading) return <Loader full label="Loading item…" />;
+  if (error || !asset)
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-10">
+        <ErrorState message={error ?? "Item not found"} onRetry={load} />
+      </div>
+    );
+
+  const isOwner = user?.id === asset.owner_id;
+
+  const onRequest = () => {
+    if (!isAuthenticated) {
+      toast.info("Log in to request a rental");
+      navigate({ to: "/login" });
+      return;
+    }
+    setModalOpen(true);
+  };
+
+  const requestButtonContent = () => {
+    if (existingRental) {
+      const labels: Record<string, string> = {
+        REQUESTED: "Request pending owner approval",
+        NEGOTIATING: "Owner sent a counter offer — check Requests",
+        ACCEPTED: "Booking confirmed — check Requests",
+        ACTIVE: "Rental in progress — check Requests",
+      };
+      return labels[existingRental.status] ?? "Already requested";
+    }
+    if (asset.availability_status === "AVAILABLE") return "Request rental";
+    return "Currently unavailable";
+  };
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-8">
+      <Link to="/browse" className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground">
+        <ChevronLeft className="h-4 w-4" /> Back to browse
+      </Link>
+
+      <div className="grid gap-8 lg:grid-cols-5">
+        {/* Image */}
+        <div className="lg:col-span-3">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted shadow-(--shadow-card)">
+            {asset.image_url ? (
+              <img src={asset.image_url} alt={asset.title} className="h-full w-full object-cover" width={800} height={600} />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-7xl font-black text-muted-foreground/20">
+                {asset.category?.[0] ?? "?"}
+              </div>
+            )}
+            <div className="absolute left-4 top-4">
+              <StatusBadge status={asset.availability_status} />
+            </div>
+            <div className="absolute right-4 top-4">
+              <WishlistButton assetId={asset.id} isOwnAsset={isOwner} />
+            </div>
+          </div>
+
+          <div className="card-elevated mt-6 p-5">
+            <h2 className="font-bold">Description</h2>
+            <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
+              {asset.description || "No description provided."}
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+              {asset.brand && <Detail label="Brand" value={asset.brand} />}
+              {asset.condition && <Detail label="Condition" value={asset.condition} />}
+              {asset.purchase_year && <Detail label="Purchase year" value={String(asset.purchase_year)} />}
+              <Detail label="Times rented" value={String(asset.usage_count)} />
+              {asset.average_rating > 0 && (
+                <Detail label="Rating" value={`${Number(asset.average_rating).toFixed(1)} ★`} />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="lg:col-span-2">
+          <div className="card-elevated p-5">
+            <div className="flex items-start justify-between gap-2">
+              <h1 className="text-xl font-extrabold leading-snug">{asset.title}</h1>
+              {asset.average_rating > 0 && (
+                <span className="flex shrink-0 items-center gap-1 text-sm font-semibold">
+                  <Star className="h-4 w-4 fill-current text-primary" />
+                  {Number(asset.average_rating).toFixed(1)}
+                </span>
+              )}
+            </div>
+            <p className="mt-1 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <Tag className="h-3 w-3" /> {asset.category}
+            </p>
+
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold">{formatPrice(asset.expected_price_per_day)}</span>
+              <span className="text-sm text-muted-foreground">/ day</span>
+              {asset.price_negotiable && (
+                <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-bold text-accent-foreground">
+                  Negotiable
+                </span>
+              )}
+            </div>
+
+            <div className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+              {(asset.address || asset.city) && (
+                <p className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 shrink-0" />
+                  {[asset.address, asset.city, asset.state].filter(Boolean).join(", ")}
+                </p>
+              )}
+              {(asset.available_from || asset.available_to) && (
+                <p className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 shrink-0" />
+                  Available {formatDate(asset.available_from)} → {formatDate(asset.available_to)}
+                </p>
+              )}
+              {asset.security_deposit != null && asset.security_deposit > 0 && (
+                <p className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 shrink-0" />
+                  Security deposit: <strong className="text-foreground">{formatPrice(asset.security_deposit)}</strong> (refundable)
+                </p>
+              )}
+            </div>
+
+            <div className="mt-4">
+              <CancellationPolicyInfo policy={asset.cancellation_policy} />
+            </div>
+
+            <div className="mt-6">
+              {isOwner ? (
+                <Link
+                  to="/edit-asset/$assetId"
+                  params={{ assetId: asset.id }}
+                  className="btn-outline w-full py-3 text-sm"
+                >
+                  Edit your listing
+                </Link>
+              ) : existingRental ? (
+                <div className="space-y-2">
+                  <div className="rounded-xl border border-border bg-muted/50 px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+                    {requestButtonContent()}
+                  </div>
+                  <Link
+                    to="/requests"
+                    className="btn-outline w-full py-2 text-xs"
+                  >
+                    View your request →
+                  </Link>
+                </div>
+              ) : (
+                <button
+                  onClick={onRequest}
+                  disabled={asset.availability_status !== "AVAILABLE"}
+                  className="btn-primary w-full py-3 text-sm"
+                >
+                  {requestButtonContent()}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <OwnerPickupCard rental={existingRental} asset={asset} />
+        </div>
+      </div>
+
+      <RequestRentalModal
+        asset={asset}
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSuccess={() => {
+          setModalOpen(false);
+          toast.success("Rental request sent!");
+          navigate({ to: "/requests" });
+        }}
+      />
+    </div>
+  );
+}
+
+function OwnerPickupCard({ rental, asset }: { rental: Rental | null; asset: Asset }) {
+  const contact = rental?.owner_contact;
+  if (!contact) return null;
+
+  // Use the asset's pickup coordinates (where the item is located), not the
+  // owner's profile coordinates — these are the authoritative pickup coords.
+  const hasLocation = asset.latitude != null && asset.longitude != null;
+  const mapsUrl = hasLocation
+    ? `https://www.google.com/maps?q=${asset.latitude},${asset.longitude}`
+    : null;
+
+  return (
+    <div className="card-elevated mt-4 p-5">
+      <h2 className="font-bold">Owner information</h2>
+      <p className="mt-0.5 text-xs text-muted-foreground">
+        Your request was accepted — here's how to reach the owner and pick up the item.
+      </p>
+      <div className="mt-3 space-y-2 text-sm">
+        <p className="font-semibold">{contact.full_name}</p>
+        {contact.phone && (
+          <p className="flex items-center gap-2 text-muted-foreground">
+            <Phone className="h-4 w-4 shrink-0" /> {contact.phone}
+          </p>
+        )}
+        <p className="flex items-center gap-2 text-muted-foreground">
+          <Mail className="h-4 w-4 shrink-0" /> {contact.email}
+        </p>
+        {(contact.city || contact.state) && (
+          <p className="flex items-center gap-2 text-muted-foreground">
+            <MapPin className="h-4 w-4 shrink-0" />
+            {[contact.city, contact.state].filter(Boolean).join(", ")}
+          </p>
+        )}
+        {mapsUrl && (
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+          >
+            <MapPin className="h-3 w-3" />
+            Open pickup location in Google Maps
+          </a>
+        )}
+      </div>
+      {rental && (
+        <DepositSummary
+          amount={rental.security_deposit ?? 0}
+          status={rental.deposit_status}
+          refundAmount={rental.deposit_refund_amount}
+          notes={rental.deposit_notes}
+        />
+      )}
+    </div>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg bg-muted px-3 py-2">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="font-medium">{value}</p>
+    </div>
+  );
+}
+
+function RequestRentalModal({
+  asset,
+  open,
+  onClose,
+  onSuccess,
+}: {
+  asset: Asset;
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [offeredPrice, setOfferedPrice] = useState("");
+  const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+
+  const days = startDate && endDate ? daysBetween(startDate, endDate) : 0;
+  const expected = days * asset.expected_price_per_day;
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs: Record<string, string> = {};
+    const today = new Date().toISOString().slice(0, 10);
+    if (!startDate) errs.startDate = "Pick a start date";
+    else if (startDate < today) errs.startDate = "Start date cannot be in the past";
+    if (!endDate) errs.endDate = "Pick an end date";
+    else if (endDate < startDate) errs.endDate = "End date must be after start date";
+    if (offeredPrice && Number(offeredPrice) <= 0) errs.offeredPrice = "Enter a valid offer";
+    setErrors(errs);
+    if (Object.keys(errs).length) return;
+
+    setSubmitting(true);
+    try {
+      await createRental({
+        assetId: asset.id,
+        startDate,
+        endDate,
+        offeredPrice: offeredPrice ? Number(offeredPrice) : undefined,
+        borrowerMessage: message.trim() || undefined,
+      });
+      onSuccess();
+    } catch (err) {
+      toast.error(getApiError(err));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} title="Request rental">
+      <form onSubmit={submit} className="space-y-4" noValidate>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="mb-1 block text-sm font-semibold">Start date</label>
+            <input type="date" className="input-base" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            {errors.startDate && <p className="mt-1 text-xs text-destructive">{errors.startDate}</p>}
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-semibold">End date</label>
+            <input type="date" className="input-base" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            {errors.endDate && <p className="mt-1 text-xs text-destructive">{errors.endDate}</p>}
+          </div>
+        </div>
+        {days > 0 && (
+          <p className="rounded-lg bg-accent px-3 py-2 text-sm text-accent-foreground">
+            {days} day{days > 1 ? "s" : ""} × {formatPrice(asset.expected_price_per_day)} ={" "}
+            <strong>{formatPrice(expected)}</strong> expected
+          </p>
+        )}
+        {asset.security_deposit != null && asset.security_deposit > 0 && (
+          <p className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+            A refundable security deposit of{" "}
+            <strong className="text-foreground">{formatPrice(asset.security_deposit)}</strong> applies to this
+            item and is settled with the owner after pickup.
+          </p>
+        )}
+        <CancellationPolicyInfo policy={asset.cancellation_policy} />
+        {startDate && (
+          <p className="text-xs text-muted-foreground">
+            Cancelling today would recommend a{" "}
+            <strong className="text-foreground">
+              {estimateRefundPercent(asset.cancellation_policy, startDate)}% refund
+            </strong>{" "}
+            based on this item's policy.
+          </p>
+        )}
+        <div>
+          <label className="mb-1 block text-sm font-semibold">
+            Your offer (₹ total){" "}
+            <span className="font-normal text-muted-foreground">— optional</span>
+          </label>
+          <input
+            type="number"
+            className="input-base"
+            placeholder={expected ? String(expected) : "3200"}
+            value={offeredPrice}
+            onChange={(e) => setOfferedPrice(e.target.value)}
+          />
+          {errors.offeredPrice && <p className="mt-1 text-xs text-destructive">{errors.offeredPrice}</p>}
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-semibold">
+            Message <span className="font-normal text-muted-foreground">— optional</span>
+          </label>
+          <textarea
+            className="input-base min-h-20"
+            placeholder="Tell the owner why you need it…"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+        </div>
+        <button type="submit" disabled={submitting} className="btn-primary w-full py-3 text-sm">
+          {submitting ? "Sending request…" : "Send request"}
+        </button>
+      </form>
+    </Modal>
+  );
+}

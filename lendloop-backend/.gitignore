@@ -1,0 +1,16 @@
+node_modules
+
+# Environment variables (never commit real secrets/keys)
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+*.log
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
