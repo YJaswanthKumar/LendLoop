@@ -1,8 +1,24 @@
 # LendLoop
 ### Community Asset Sharing & Rental Platform
 
-LendLoop is a full-stack web application that enables individuals to list, discover, rent, and manage community-owned assets through a secure and user-friendly platform. Instead of purchasing items that are only used occasionally, users can share resources within their community, making rentals more affordable and reducing unnecessary ownership.
+LendLoop is a full-stack community asset sharing and rental platform that enables users to list, discover, rent, and manage community-owned assets securely.
 
+The platform now includes:
+
+- User Authentication
+- Asset Listing & Management
+- Nearby Asset Discovery
+- Rental Request & Negotiation
+- Wishlist Management
+- Rental Cancellation Policies
+- Security Deposit Tracking
+- Notifications
+- Reviews & Ratings
+- Dashboard Analytics
+- Live User Presence
+- Admin Portal for platform monitoring and management
+
+LendLoop helps reduce unnecessary ownership by allowing communities to share resources efficiently while providing a secure rental workflow.
 The platform provides secure user authentication, asset management, rental request negotiation, reviews, notifications, search, nearby asset discovery, and a personalized dashboard, all integrated through a RESTful API with a PostgreSQL database.
 
 | Category       | Details                                   |
@@ -27,7 +43,15 @@ The platform provides secure user authentication, asset management, rental reque
 
 # Demo Credentials
 
-To simplify project evaluation, the following test accounts are available. These accounts already contain sample data (assets, rental history, notifications, etc.) stored in the Supabase database.
+## Admin Account
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@gmail.com | Admin@123 |
+
+---
+
+## Test User Accounts
 
 | User | Email | Password |
 |------|-------|----------|
@@ -35,6 +59,10 @@ To simplify project evaluation, the following test accounts are available. These
 | Test User 2 | test1@gmail.com | Test@123 |
 | Test User 3 | test2@gmail.com | Test@123 |
 | Test User 4 | check1@gmail.com | check@123 |
+| Test User 5 | testuser4@gmail.com | Test@123 |
+| Test User 6 | testuser6@gmail.com | Test@123 |
+| Test User 7 | testuser7@gmail.com | Test@123 |
+| Test User 8 | testuser8@gmail.com | Test@123 | 
 
 > **Note:** These are demonstration accounts created specifically for evaluation purposes. Sample data has been pre-populated in the database to allow judges to explore the application's functionality without creating new accounts.
 
@@ -104,6 +132,35 @@ LendLoop addresses this problem by providing a centralized platform where commun
 - Trending Categories
 - Analytics
 
+### Wishlist
+
+- Save Assets
+- Remove Wishlist Items
+- Wishlist Dashboard
+
+### Cancellation Policy
+
+- Flexible
+- Moderate
+- Strict
+- Automatic Refund Calculation
+
+### Security Deposit
+
+- Deposit Tracking
+- Deposit Status
+- Deposit Resolution
+
+### Admin Portal
+
+- User Management
+- Asset Moderation
+- Rental Monitoring
+- Review Monitoring
+- Platform Analytics
+- Activity Logs
+- Live Presence Monitoring
+
 ---
 
 # Technology Stack
@@ -140,33 +197,40 @@ LendLoop addresses this problem by providing a centralized platform where commun
 # High-Level System Architecture
 
 ```
-                   +----------------------+
-                   |      Frontend        |
-                   |   React + Vite       |
-                   +----------+-----------+
-                              |
-                     REST API Requests
-                              |
-                              ▼
-                   +----------------------+
-                   |   Express Backend     |
-                   | Controllers           |
-                   | Services              |
-                   | Middleware            |
-                   +----------+-----------+
-                              |
-                     Supabase Client
-                              |
-                              ▼
-                +-----------------------------+
-                | Supabase PostgreSQL Database |
-                +-----------------------------+
-                     |      |       |      |
-                     ▼      ▼       ▼      ▼
-                  Users  Assets  Rentals Reviews
-                               |
-                               ▼
-                        Notifications
+                              +---------------------------+
+                              |       Frontend            |
+                              | React + Vite + TypeScript |
+                              +------------+--------------+
+                                           |
+                                   REST API (Axios)
+                                           |
+                                           ▼
+                              +---------------------------+
+                              |    Express.js Backend     |
+                              |---------------------------|
+                              | Routes                    |
+                              | Controllers               |
+                              | Middleware                |
+                              | Validators                |
+                              | Service Layer             |
+                              +------------+--------------+
+                                           |
+                                  Supabase JavaScript SDK
+                                           |
+                                           ▼
+                    +-----------------------------------------------+
+                    |          Supabase PostgreSQL Database         |
+                    +-----------------------------------------------+
+                     |        |          |         |        |        |
+                     ▼        ▼          ▼         ▼        ▼        ▼
+                  Users    Assets     Rentals   Reviews Notifications
+                     |        |          |         |        |
+                     |        |          |         |        |
+                     ▼        ▼          ▼         ▼        ▼
+                 Wishlist  Deposits  Cancellation  Activity Logs
+                     |
+                     ▼
+              Admin Portal & Analytics
 ```
 
 ---
@@ -174,40 +238,73 @@ LendLoop addresses this problem by providing a centralized platform where commun
 # System Workflow
 
 ```
-User
-   │
-   ▼
-Frontend (React + Vite)
-   │
-   ▼
-REST API Request
-   │
-   ▼
-Express Router
-   │
-   ▼
-Controller
-   │
-   ▼
-Service Layer
-   │
-   ▼
+                  User / Admin
+                        │
+                        ▼
+             React + Vite Frontend
+                        │
+                        ▼
+                 Axios API Requests
+                        │
+                        ▼
+                 Express Router Layer
+                        │
+                        ▼
+              Authentication Middleware
+                        │
+                        ▼
+               Validation Middleware
+                        │
+                        ▼
+                   Controllers
+                        │
+                        ▼
+                  Service Layer
+                        │
+                        ▼
+              Supabase JavaScript SDK
+                        │
+                        ▼
+            PostgreSQL (Supabase Database)
+                        │
+                        ▼
+                 Business Logic Result
+                        │
+                        ▼
+                 JSON API Response
+                        │
+                        ▼
+                  Frontend UI Update
+```
+
+# Backen Architecture
+
+```
+Client Request
+      │
+      ▼
+Routes
+      │
+      ▼
+Authentication Middleware
+      │
+      ▼
+Validation Middleware
+      │
+      ▼
+Controllers
+      │
+      ▼
+Business Logic (Services)
+      │
+      ▼
 Supabase Client
-   │
-   ▼
+      │
+      ▼
 PostgreSQL Database
-   │
-   ▼
-Service Layer
-   │
-   ▼
-Controller
-   │
-   ▼
+      │
+      ▼
 JSON Response
-   │
-   ▼
-Frontend UI
 ```
 
 ---
@@ -217,23 +314,56 @@ Frontend UI
 ## Frontend
 
 ```
-frontend/
+lendloop-frontend/
 │
 ├── public/
+│
 ├── src/
 │   ├── assets/
+│   │
 │   ├── components/
+│   │   ├── admin/
+│   │   ├── dashboard/
+│   │   ├── layout/
+│   │   ├── maps/
+│   │   ├── notifications/
+│   │   ├── rental/
+│   │   ├── wishlist/
+│   │   └── common/
+│   │
 │   ├── contexts/
+│   │
 │   ├── hooks/
+│   │
 │   ├── pages/
+│   │
 │   ├── routes/
+│   │   ├── admin/
+│   │   ├── auth/
+│   │   ├── dashboard/
+│   │   ├── wishlist/
+│   │   ├── rentals/
+│   │   └── assets/
+│   │
 │   ├── services/
+│   │   ├── api.ts
+│   │   ├── adminService.ts
+│   │   ├── assetService.ts
+│   │   ├── rentalService.ts
+│   │   ├── wishlistService.ts
+│   │   └── notificationService.ts
+│   │
 │   ├── styles/
+│   │
+│   ├── types/
+│   │
 │   ├── utils/
-│   └── main.jsx
+│   │
+│   ├── App.tsx
+│   └── main.tsx
 │
 ├── package.json
-└── vite.config.js
+└── vite.config.ts
 ```
 
 ### Frontend Folder Description
@@ -255,16 +385,62 @@ frontend/
 ## Backend
 
 ```
-backend/
+lendloop-backend/
+│
+├── sql/
+│   ├── 0001_foundation.sql
+│   └── 002_admin_features.sql
 │
 ├── src/
 │   ├── config/
+│   │
 │   ├── controllers/
+│   │   ├── admin.controller.js
+│   │   ├── asset.controller.js
+│   │   ├── auth.controller.js
+│   │   ├── dashboard.controller.js
+│   │   ├── notification.controller.js
+│   │   ├── rental.controller.js
+│   │   ├── review.controller.js
+│   │   └── wishlist.controller.js
+│   │
 │   ├── middleware/
+│   │   ├── admin.middleware.js
+│   │   ├── auth.middleware.js
+│   │   ├── error.middleware.js
+│   │   └── validation.middleware.js
+│   │
 │   ├── routes/
+│   │   ├── admin.routes.js
+│   │   ├── asset.routes.js
+│   │   ├── auth.routes.js
+│   │   ├── dashboard.routes.js
+│   │   ├── notification.routes.js
+│   │   ├── rental.routes.js
+│   │   ├── review.routes.js
+│   │   └── wishlist.routes.js
+│   │
 │   ├── services/
+│   │   ├── activity.service.js
+│   │   ├── admin.service.js
+│   │   ├── asset.service.js
+│   │   ├── auth.service.js
+│   │   ├── dashboard.service.js
+│   │   ├── notification.service.js
+│   │   ├── rental.service.js
+│   │   ├── review.service.js
+│   │   └── wishlist.service.js
+│   │
 │   ├── validators/
+│   │   ├── admin.validator.js
+│   │   ├── asset.validator.js
+│   │   ├── auth.validator.js
+│   │   ├── rental.validator.js
+│   │   ├── review.validator.js
+│   │   └── wishlist.validator.js
+│   │
 │   ├── utils/
+│   │
 │   ├── app.js
 │   └── server.js
 │
@@ -305,34 +481,39 @@ The database follows a relational model where users own assets, assets receive r
 # Database Architecture
 
 ```
-                           +----------------+
-                           |     Users      |
-                           +----------------+
-                                  |
-              +-------------------+------------------+
-              |                                      |
-              | owns                                 | receives
-              ▼                                      ▼
-        +--------------+                    +----------------+
-        |    Assets    |                    | Notifications  |
-        +--------------+                    +----------------+
-              |
-              | rented through
-              ▼
-        +--------------+
-        |   Rentals    |
-        +--------------+
-         ▲            ▲
-         |            |
- borrower |            | owner
-         |            |
-         +------------+
-              |
-              | completed rental
-              ▼
-        +--------------+
-        |   Reviews    |
-        +--------------+
+                              +----------------+
+                              |     Users      |
+                              +----------------+
+                                      |
+          +---------------------------+----------------------------+
+          |                           |                            |
+          ▼                           ▼                            ▼
+      +--------+               +--------------+            +----------------+
+      | Assets |               | Notifications|            | Activity Logs  |
+      +--------+               +--------------+            +----------------+
+          |
+          |
+          ▼
+      +-----------+
+      | Wishlists |
+      +-----------+
+          |
+          ▼
+      +-----------+
+      | Rentals   |
+      +-----------+
+          |
+     +----+-------------------------+
+     |                              |
+     ▼                              ▼
++-------------+             +---------------+
+| Deposits    |             | Reviews       |
++-------------+             +---------------+
+     |
+     ▼
++----------------------+
+| Cancellation Policy  |
++----------------------+
 ```
 
 ---
