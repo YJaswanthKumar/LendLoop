@@ -1,6 +1,6 @@
 # ROL — Rent or Lend
 
-Community asset sharing & rental platform. Get anything from neighbours near you. Earn from your own things.
+Community asset sharing & rental platform. Why buy something you'll use twice? Borrow it from a neighbour for almost nothing — or list what you own and let it pay for itself.
 
 ## Stack
 

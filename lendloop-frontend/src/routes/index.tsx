@@ -46,8 +46,8 @@ function LandingPage() {
               <span className="text-primary">Earn from your own things.</span>
             </h1>
             <p className="mt-4 max-w-md text-muted-foreground">
-              Cameras, laptops, tools, sports gear and more — borrow from trusted neighbours
-              nearby for a fraction of the cost, or turn idle items into income.
+              Why buy something you'll use twice? Borrow it from a neighbour for almost nothing —
+              or list what you own and let it pay for itself.
             </p>
             <form
               onSubmit={onSearch}
