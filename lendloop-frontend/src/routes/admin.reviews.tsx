@@ -11,7 +11,7 @@ import { timeAgo } from "@/utils/format";
 import type { AdminReview, PaginationInfo } from "@/utils/types";
 
 export const Route = createFileRoute("/admin/reviews")({
-  head: () => ({ meta: [{ title: "Reviews — Admin — LendLoop" }] }),
+  head: () => ({ meta: [{ title: "Reviews — Admin — ROL" }] }),
   component: AdminReviewsPage,
 });
 

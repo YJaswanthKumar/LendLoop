@@ -34,8 +34,12 @@ export function Navbar() {
 
   useEffect(() => {
     const handler = () => fetchUnread();
-    window.addEventListener("lendloop:notification-read", handler);
-    return () => window.removeEventListener("lendloop:notification-read", handler);
+    window.addEventListener("rol:notification-read", handler);
+    window.addEventListener("lendloop:notification-read", handler); // backwards compat
+    return () => {
+      window.removeEventListener("rol:notification-read", handler);
+      window.removeEventListener("lendloop:notification-read", handler);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
@@ -51,12 +55,12 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4">
         <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Leaf className="h-5 w-5" />
           </span>
-          <span className="text-lg font-extrabold tracking-tight">LendLoop</span>
+          <span className="text-lg font-extrabold tracking-tight">ROL</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -69,19 +73,11 @@ export function Navbar() {
           </Link>
           {isAuthenticated && (
             <>
-              <Link to="/dashboard" className={navLink}>
-                Dashboard
-              </Link>
-              <Link to="/requests" className={navLink}>
-                Requests
-              </Link>
-              <Link to="/history" className={navLink}>
-                Rentals
-              </Link>
+              <Link to="/dashboard" className={navLink}>Dashboard</Link>
+              <Link to="/requests" className={navLink}>Requests</Link>
+              <Link to="/history" className={navLink}>Rentals</Link>
               {user?.is_admin && (
-                <Link to="/admin" className={navLink}>
-                  Admin
-                </Link>
+                <Link to="/admin" className={navLink}>Admin</Link>
               )}
             </>
           )}
@@ -158,12 +154,8 @@ export function Navbar() {
             </>
           ) : (
             <div className="hidden items-center gap-2 md:flex">
-              <Link to="/login" className="btn-outline px-4 py-2 text-sm">
-                Log in
-              </Link>
-              <Link to="/register" className="btn-primary px-4 py-2 text-sm">
-                Sign up
-              </Link>
+              <Link to="/login" className="btn-outline px-4 py-2 text-sm">Log in</Link>
+              <Link to="/register" className="btn-primary px-4 py-2 text-sm">Sign up</Link>
             </div>
           )}
           <button
@@ -188,25 +180,13 @@ export function Navbar() {
             </Link>
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/dashboard"
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-                >
+                <Link to="/dashboard" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted">
                   Dashboard
                 </Link>
-                <Link
-                  to="/create-asset"
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-                >
+                <Link to="/create-asset" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted">
                   List an item
                 </Link>
-                <Link
-                  to="/wishlist"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-                >
+                <Link to="/wishlist" onClick={() => setOpen(false)} className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted">
                   Wishlist
                   {wishlistedIds.size > 0 && (
                     <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
@@ -214,57 +194,30 @@ export function Navbar() {
                     </span>
                   )}
                 </Link>
-                <Link
-                  to="/requests"
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-                >
+                <Link to="/requests" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted">
                   Rental requests
                 </Link>
-                <Link
-                  to="/history"
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-                >
+                <Link to="/history" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted">
                   Rental history
                 </Link>
                 {user?.is_admin && (
-                  <Link
-                    to="/admin"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-                  >
+                  <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted">
                     <ShieldCheck className="h-4 w-4" /> Admin portal
                   </Link>
                 )}
-                <Link
-                  to="/profile"
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-                >
+                <Link to="/profile" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted">
                   Profile
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="rounded-lg px-3 py-2.5 text-left text-sm font-medium text-destructive hover:bg-muted"
-                >
+                <button onClick={handleLogout} className="rounded-lg px-3 py-2.5 text-left text-sm font-medium text-destructive hover:bg-muted">
                   Sign out
                 </button>
               </>
             ) : (
               <div className="mt-2 flex gap-2">
-                <Link
-                  to="/login"
-                  onClick={() => setOpen(false)}
-                  className="btn-outline flex-1 px-4 py-2.5 text-sm"
-                >
+                <Link to="/login" onClick={() => setOpen(false)} className="btn-outline flex-1 px-4 py-2.5 text-sm">
                   Log in
                 </Link>
-                <Link
-                  to="/register"
-                  onClick={() => setOpen(false)}
-                  className="btn-primary flex-1 px-4 py-2.5 text-sm"
-                >
+                <Link to="/register" onClick={() => setOpen(false)} className="btn-primary flex-1 px-4 py-2.5 text-sm">
                   Sign up
                 </Link>
               </div>

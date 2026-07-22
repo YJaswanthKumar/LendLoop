@@ -52,7 +52,7 @@ function AdminLayout() {
           Your account doesn't have permission to view the admin portal.
         </p>
         <Link to="/" className="btn-primary mt-2 px-5 py-2 text-sm">
-          Back to LendLoop
+          Back to ROL
         </Link>
       </div>
     );

@@ -17,8 +17,8 @@ import type { Rental } from "@/utils/types";
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({
     meta: [
-      { title: "Rental history — LendLoop" },
-      { name: "description", content: "Your active, completed and cancelled rentals on LendLoop." },
+      { title: "Rental history — ROL" },
+      { name: "description", content: "Your active, completed and cancelled rentals on ROL." },
     ],
   }),
   component: HistoryPage,

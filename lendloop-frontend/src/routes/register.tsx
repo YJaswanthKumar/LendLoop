@@ -7,9 +7,9 @@ import { getApiError } from "@/api/api";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Sign up — LendLoop" },
-      { name: "description", content: "Create a free LendLoop account and start renting or lending items in your neighbourhood." },
-      { property: "og:title", content: "Sign up — LendLoop" },
+      { title: "Sign up — ROL" },
+      { name: "description", content: "Create a free ROL account and start renting or lending items in your neighbourhood." },
+      { property: "og:title", content: "Sign up — ROL" },
       { property: "og:description", content: "Join the community asset-sharing platform." },
     ],
   }),
@@ -56,7 +56,7 @@ function RegisterPage() {
         state: form.state.trim() || undefined,
         country: form.country.trim() || undefined,
       });
-      toast.success("Account created — welcome to LendLoop!");
+      toast.success("Account created — welcome to ROL!");
       navigate({ to: "/dashboard" });
     } catch (err) {
       toast.error(getApiError(err));

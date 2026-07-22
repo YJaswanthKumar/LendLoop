@@ -12,7 +12,7 @@ import { formatDate, formatPrice } from "@/utils/format";
 import type { AdminRental, PaginationInfo, RentalStatus } from "@/utils/types";
 
 export const Route = createFileRoute("/admin/rentals")({
-  head: () => ({ meta: [{ title: "Rentals — Admin — LendLoop" }] }),
+  head: () => ({ meta: [{ title: "Rentals — Admin — ROL" }] }),
   component: AdminRentalsPage,
 });
 

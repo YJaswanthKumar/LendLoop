@@ -34,20 +34,20 @@ function LandingPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="mx-auto max-w-6xl px-4 pt-10 sm:pt-16">
+      <section className="mx-auto max-w-7xl px-4 pt-10 sm:pt-16">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground">
               <Sparkles className="h-3.5 w-3.5" /> Community-powered rentals
             </span>
-            <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-              Rent what you need.
+            <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+              Get anything.
               <br />
-              <span className="text-primary">Lend what you don't.</span>
+              <span className="text-primary">Earn from your own things.</span>
             </h1>
             <p className="mt-4 max-w-md text-muted-foreground">
               Cameras, laptops, tools, sports gear and more — borrow from trusted neighbours
-              nearby, or earn from the things gathering dust at home.
+              nearby for a fraction of the cost, or turn idle items into income.
             </p>
             <form
               onSubmit={onSearch}
@@ -57,7 +57,7 @@ function LandingPage() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="What do you need? Try “camera”…"
+                placeholder={'What do you need? Try \u201ccamera\u201d\u2026'}
                 className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               />
               <button type="submit" className="btn-primary shrink-0 px-5 py-2.5 text-sm">
@@ -90,11 +90,11 @@ function LandingPage() {
       </section>
 
       {/* Featured */}
-      <section className="mx-auto max-w-6xl px-4 py-14">
+      <section className="mx-auto max-w-7xl px-4 py-14">
         <div className="mb-5 flex items-end justify-between">
           <div>
-            <h2 className="text-2xl font-extrabold tracking-tight">Featured near you</h2>
-            <p className="text-sm text-muted-foreground">Fresh listings from the community</p>
+            <h2 className="text-2xl font-extrabold tracking-tight">Available near you</h2>
+            <p className="text-sm text-muted-foreground">Fresh listings from your community</p>
           </div>
           <Link to="/browse" className="flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
             View all <ArrowRight className="h-4 w-4" />
@@ -103,7 +103,7 @@ function LandingPage() {
         {loading ? (
           <Loader label="Loading listings…" />
         ) : featured && featured.length > 0 ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:grid-cols-4">
             {featured.map((a) => (
               <AssetCard key={a.id} asset={a} />
             ))}
@@ -119,26 +119,29 @@ function LandingPage() {
         )}
       </section>
 
-      {/* Why LendLoop */}
+      {/* Why ROL */}
       <section className="border-t border-border bg-muted/40">
-        <div className="mx-auto max-w-6xl px-4 py-14">
-          <h2 className="text-center text-2xl font-extrabold tracking-tight">Why LendLoop?</h2>
+        <div className="mx-auto max-w-7xl px-4 py-14">
+          <h2 className="text-center text-2xl font-extrabold tracking-tight">Why Rent or Lend?</h2>
+          <p className="mx-auto mt-2 max-w-lg text-center text-sm text-muted-foreground">
+            Stop buying things you only need once. Stop letting valuable stuff collect dust.
+          </p>
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
             {[
               {
                 icon: MapPin,
-                title: "Hyper-local",
-                text: "Find items minutes away. See everything on a live map and pick up nearby.",
+                title: "Get anything, nearby",
+                text: "Find items minutes away. Borrow a drill, a camera, or camping gear from a neighbour — not a store.",
               },
               {
                 icon: HandCoins,
-                title: "Earn & save",
-                text: "Turn idle items into income, and rent for a fraction of the buying price.",
+                title: "Earn from your own things",
+                text: "Your idle camera, power tools, or bike can pay you back. List once, earn every time someone needs it.",
               },
               {
                 icon: ShieldCheck,
                 title: "Built on trust",
-                text: "Ratings, reviews and trust scores from real completed rentals keep everyone honest.",
+                text: "Ratings, reviews and trust scores from real completed rentals keep every transaction honest.",
               },
             ].map((f) => (
               <div key={f.title} className="card-elevated p-6 text-center">
@@ -152,7 +155,7 @@ function LandingPage() {
           </div>
           <div className="mt-10 text-center">
             <Link to="/register" className="btn-primary px-8 py-3 text-sm">
-              Join LendLoop — it's free
+              Join ROL — it's free
             </Link>
           </div>
         </div>

@@ -13,7 +13,7 @@ import type { PaginationInfo, WishlistItem } from "@/utils/types";
 
 export const Route = createFileRoute("/_authenticated/wishlist")({
   head: () => ({
-    meta: [{ title: "Wishlist — LendLoop" }],
+    meta: [{ title: "Wishlist — ROL" }],
   }),
   component: WishlistPage,
 });

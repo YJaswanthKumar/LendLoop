@@ -15,8 +15,8 @@ import type { AppNotification, PaginationInfo } from "@/utils/types";
 export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({
     meta: [
-      { title: "Notifications — LendLoop" },
-      { name: "description", content: "Your LendLoop notifications: requests, offers and rental updates." },
+      { title: "Notifications — ROL" },
+      { name: "description", content: "Your ROL notifications: requests, offers and rental updates." },
     ],
   }),
   component: NotificationsPage,

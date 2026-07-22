@@ -12,9 +12,10 @@ export function AssetCard({ asset }: { asset: Asset }) {
     <Link
       to="/assets/$assetId"
       params={{ assetId: asset.id }}
-      className="card-elevated group block overflow-hidden transition-shadow hover:shadow-(--shadow-card-hover)"
+      className="card-elevated group flex flex-col overflow-hidden transition-shadow hover:shadow-(--shadow-card-hover)"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+      {/* Image — square on mobile, 4:3 on sm+ */}
+      <div className="relative aspect-square overflow-hidden bg-muted sm:aspect-[4/3]">
         {asset.image_url ? (
           <img
             src={asset.image_url}
@@ -27,44 +28,47 @@ export function AssetCard({ asset }: { asset: Asset }) {
             {asset.category?.[0] ?? "?"}
           </div>
         )}
-        <div className="absolute left-3 top-3">
+        <div className="absolute left-2 top-2 sm:left-3 sm:top-3">
           <StatusBadge status={asset.availability_status} />
         </div>
-        <div className="absolute right-3 top-3">
+        <div className="absolute right-2 top-2 sm:right-3 sm:top-3">
           <WishlistButton assetId={asset.id} isOwnAsset={user?.id === asset.owner_id} size="sm" />
         </div>
       </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="line-clamp-1 font-semibold">{asset.title}</h3>
+
+      {/* Content */}
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        <div className="flex items-start justify-between gap-1.5">
+          <h3 className="line-clamp-2 text-sm font-semibold leading-snug sm:line-clamp-1 sm:text-base">
+            {asset.title}
+          </h3>
           {asset.average_rating > 0 && (
-            <span className="flex shrink-0 items-center gap-1 text-sm text-muted-foreground">
-              <Star className="h-3.5 w-3.5 fill-current text-primary" />
+            <span className="flex shrink-0 items-center gap-0.5 text-xs text-muted-foreground sm:gap-1 sm:text-sm">
+              <Star className="h-3 w-3 fill-current text-primary sm:h-3.5 sm:w-3.5" />
               {Number(asset.average_rating).toFixed(1)}
             </span>
           )}
         </div>
-        <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">
           {asset.category}
         </p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          {(asset.city || asset.distance_km != null) && (
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
+        {(asset.city || asset.distance_km != null) && (
+          <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground sm:text-xs">
+            <MapPin className="h-2.5 w-2.5 shrink-0 sm:h-3 sm:w-3" />
+            <span className="truncate">
               {asset.distance_km != null && Number(asset.distance_km) >= 0.1
                 ? `${Number(asset.distance_km).toFixed(1)} km away`
                 : (asset.city ?? "Nearby")}
             </span>
-          )}
-          {asset.usage_count > 0 && <span>rented {asset.usage_count}×</span>}
-        </div>
-        <div className="mt-3 flex items-baseline justify-between">
-          <p className="text-base font-bold">
+          </div>
+        )}
+        <div className="mt-auto pt-2.5 flex items-baseline justify-between">
+          <p className="text-sm font-bold sm:text-base">
             {formatPrice(asset.expected_price_per_day)}
-            <span className="text-xs font-normal text-muted-foreground"> / day</span>
+            <span className="text-[10px] font-normal text-muted-foreground sm:text-xs"> / day</span>
           </p>
           {asset.price_negotiable && (
-            <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold text-accent-foreground">
+            <span className="rounded-full bg-accent px-1.5 py-0.5 text-[9px] font-semibold text-accent-foreground sm:px-2 sm:text-[10px]">
               Negotiable
             </span>
           )}

@@ -29,8 +29,8 @@ import type { Asset, Rental } from "@/utils/types";
 export const Route = createFileRoute("/assets/$assetId")({
   head: () => ({
     meta: [
-      { title: "Item details — LendLoop" },
-      { name: "description", content: "View item details, price and availability, and request a rental on LendLoop." },
+      { title: "Item details — ROL" },
+      { name: "description", content: "View item details, price and availability, and request a rental on ROL." },
     ],
   }),
   component: AssetDetailsPage,

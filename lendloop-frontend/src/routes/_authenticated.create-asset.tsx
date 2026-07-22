@@ -14,8 +14,8 @@ import { createAsset } from "@/services/assetService";
 export const Route = createFileRoute("/_authenticated/create-asset")({
   head: () => ({
     meta: [
-      { title: "List an item — LendLoop" },
-      { name: "description", content: "List an item for rent on LendLoop and start earning." },
+      { title: "List an item — ROL" },
+      { name: "description", content: "List an item for rent on ROL and start earning." },
     ],
   }),
   component: CreateAssetPage,

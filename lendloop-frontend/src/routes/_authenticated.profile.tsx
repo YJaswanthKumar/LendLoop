@@ -15,8 +15,8 @@ import type { Review, User } from "@/utils/types";
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
-      { title: "My profile — LendLoop" },
-      { name: "description", content: "Your LendLoop profile: personal details, trust score, ratings and reviews." },
+      { title: "My profile — ROL" },
+      { name: "description", content: "Your ROL profile: personal details, trust score, ratings and reviews." },
     ],
   }),
   component: ProfilePage,

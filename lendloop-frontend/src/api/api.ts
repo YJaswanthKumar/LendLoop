@@ -46,7 +46,7 @@ export function getApiError(err: unknown): string {
     const data = err.response?.data as ApiEnvelope<unknown> | undefined;
     if (data?.errors?.length) return data.errors.map((e) => e.message).join(". ");
     if (data?.message) return data.message;
-    if (err.code === "ERR_NETWORK") return "Cannot reach the LendLoop server. Is the backend running?";
+    if (err.code === "ERR_NETWORK") return "Cannot reach the ROL server. Is the backend running?";
     return err.message;
   }
   return err instanceof Error ? err.message : "Something went wrong";

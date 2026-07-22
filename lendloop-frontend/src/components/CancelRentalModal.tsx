@@ -79,7 +79,7 @@ export function CancelRentalModal({
           </div>
 
           <p className="text-xs text-muted-foreground">
-            LendLoop doesn't process payments directly — this is guidance for how you and the other party
+            ROL doesn't process payments directly — this is guidance for how you and the other party
             should settle up.
           </p>
 

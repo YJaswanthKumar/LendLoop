@@ -20,7 +20,7 @@ import { formatDate, timeAgo } from "@/utils/format";
 import type { ActivityLog, PaginationInfo } from "@/utils/types";
 
 export const Route = createFileRoute("/admin/activity")({
-  head: () => ({ meta: [{ title: "Activity feed — Admin — LendLoop" }] }),
+  head: () => ({ meta: [{ title: "Activity feed — Admin — ROL" }] }),
   component: AdminActivityPage,
 });
 
@@ -67,7 +67,7 @@ function AdminActivityPage() {
   return (
     <div>
       <h1 className="text-2xl font-extrabold tracking-tight">Platform activity feed</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Real-time-ish log of everything happening on LendLoop, newest first.</p>
+      <p className="mt-1 text-sm text-muted-foreground">Real-time-ish log of everything happening on ROL, newest first.</p>
 
       <div className="mt-4">
         <select

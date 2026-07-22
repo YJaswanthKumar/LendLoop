@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { LocateFixed, SlidersHorizontal, Search as SearchIcon, X } from "lucide-react";
+import { LocateFixed, Map, SlidersHorizontal, Search as SearchIcon, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AssetCard } from "@/components/AssetCard";
 import { AssetCardSkeletonGrid } from "@/components/AssetCardSkeleton";
@@ -24,13 +24,13 @@ export const Route = createFileRoute("/browse")({
   }),
   head: () => ({
     meta: [
-      { title: "Browse items — LendLoop" },
+      { title: "Browse items — ROL" },
       {
         name: "description",
         content:
-          "Search, filter and map rentable items near you: electronics, tools, cameras, books and more.",
+          "Search and filter rentable items near you: electronics, tools, cameras, books and more.",
       },
-      { property: "og:title", content: "Browse items — LendLoop" },
+      { property: "og:title", content: "Browse items — ROL" },
       { property: "og:description", content: "Find rentable items in your community." },
     ],
   }),
@@ -53,6 +53,7 @@ function BrowsePage() {
   const [distance, setDistance] = useState("");
   const [sort, setSort] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [showMobileMap, setShowMobileMap] = useState(false);
 
   const [assets, setAssets] = useState<Asset[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
@@ -69,9 +70,6 @@ function BrowsePage() {
   const [MapView, setMapView] = useState<typeof LeafletMapViewType | null>(null);
   const mapLoadedRef = useRef(false);
 
-  // Keep center in a ref so fetchAssets can read the latest value without
-  // needing it as a dep (prevents spurious re-fetches when geolocation resolves
-  // while no distance filter is active).
   const centerRef = useRef(center);
   useEffect(() => { centerRef.current = center; }, [center]);
 
@@ -97,7 +95,6 @@ function BrowsePage() {
     setError(null);
     try {
       if (distance) {
-        // Distance filter: use nearby endpoint, apply other filters client-side.
         const loc = userLocationRef.current
           ? { latitude: userLocationRef.current[0], longitude: userLocationRef.current[1] }
           : centerRef.current;
@@ -111,12 +108,7 @@ function BrowsePage() {
         setAssets(list);
         setPagination(data.pagination);
       } else if (category) {
-        // Category filter: merge two result sets so we catch items that were
-        // listed under a parent category (e.g. a camera filed under "Electronics").
-        //   1. Exact category match via listAssets
-        //   2. Text search on the keyword (e.g. "Cameras" → "camera") via searchAssets
-        // Both sets are merged and deduplicated client-side, then paginated manually.
-        const keyword = category.toLowerCase().replace(/s$/, ""); // "Cameras"→"camera"
+        const keyword = category.toLowerCase().replace(/s$/, "");
         const priceAvailParams = {
           minPrice: minPrice ? Number(minPrice) : undefined,
           maxPrice: maxPrice ? Number(maxPrice) : undefined,
@@ -127,12 +119,10 @@ function BrowsePage() {
           searchAssets(keyword, 1, 50),
         ]);
 
-        // Merge: exact matches first, then any text-match not already included.
         const seen = new Set(exactData.assets.map((a) => a.id));
         const merged = [...exactData.assets];
         for (const a of textData.assets) {
           if (seen.has(a.id)) continue;
-          // Apply price/availability filters to text-search results too
           if (priceAvailParams.minPrice && a.expected_price_per_day < priceAvailParams.minPrice) continue;
           if (priceAvailParams.maxPrice && a.expected_price_per_day > priceAvailParams.maxPrice) continue;
           if (priceAvailParams.availabilityStatus && a.availability_status !== priceAvailParams.availabilityStatus) continue;
@@ -140,7 +130,6 @@ function BrowsePage() {
           merged.push(a);
         }
 
-        // Apply optional text query filter on top
         let list = merged;
         if (q.trim()) {
           const lower = q.trim().toLowerCase();
@@ -152,7 +141,6 @@ function BrowsePage() {
           );
         }
 
-        // Manual pagination over the merged set
         const pageSize = 24;
         const start = (page - 1) * pageSize;
         setAssets(list.slice(start, start + pageSize));
@@ -163,12 +151,10 @@ function BrowsePage() {
           totalPages: Math.max(1, Math.ceil(list.length / pageSize)),
         });
       } else if (q.trim()) {
-        // Text search only (no category, no distance): use the dedicated search endpoint.
         const data = await searchAssets(q.trim(), page, 24);
         setAssets(data.assets);
         setPagination(data.pagination);
       } else {
-        // No category, no search, no distance: standard listing with server-side filters.
         const data = await listAssets({
           page,
           limit: 24,
@@ -184,9 +170,6 @@ function BrowsePage() {
     } finally {
       setLoading(false);
     }
-  // Note: center and userLocation are intentionally excluded from deps —
-  // they are read via refs so geolocation resolving doesn't trigger extra
-  // fetches when no distance filter is active.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, category, minPrice, maxPrice, availability, distance, page]);
 
@@ -194,8 +177,6 @@ function BrowsePage() {
     fetchAssets();
   }, [fetchAssets]);
 
-  // Try a silent, best-effort geolocation on first load so the map centres
-  // on the user without requiring them to press "My location" first.
   useEffect(() => {
     getBrowserLocation().then((loc) => {
       if (loc) {
@@ -267,13 +248,64 @@ function BrowsePage() {
     }
   }, [assets, sort]);
 
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl font-extrabold tracking-tight">Browse items</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        See what's available on the map, then explore the full list below.
-      </p>
+  const MapPanel = (
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border shadow-(--shadow-card)">
+      {MapView ? (
+        <MapView
+          center={mapCenter}
+          assets={assets}
+          userLocation={userLocation}
+          clickedPoint={clickedPoint}
+          radiusKm={distance ? Number(distance) : undefined}
+          onMapClick={handleMapClick}
+          onAssetClick={(id) => navigate({ to: "/assets/$assetId", params: { assetId: id } })}
+        />
+      ) : (
+        <div className="flex h-full items-center justify-center bg-muted text-sm text-muted-foreground">
+          Loading map…
+        </div>
+      )}
+      {/* Coordinate chips */}
+      <div className="flex flex-wrap gap-1.5 border-t border-border bg-background p-2 text-[10px]">
+        <span className="rounded-full bg-muted px-2.5 py-1 font-medium text-muted-foreground">
+          Centre: {fmtCoord(center.latitude)}, {fmtCoord(center.longitude)}
+        </span>
+        {userLocation && (
+          <span className="rounded-full bg-blue-500/10 px-2.5 py-1 font-medium text-blue-700">
+            You: {fmtCoord(userLocation[0])}, {fmtCoord(userLocation[1])}
+          </span>
+        )}
+        {clickedPoint && (
+          <span className="rounded-full bg-amber-500/10 px-2.5 py-1 font-medium text-amber-700">
+            Pin: {fmtCoord(clickedPoint[0])}, {fmtCoord(clickedPoint[1])}
+          </span>
+        )}
+      </div>
+    </div>
+  );
 
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8">
+      {/* Header */}
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight">Browse items</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Get anything — from neighbours near you.
+          </p>
+        </div>
+        {/* Mobile map toggle */}
+        <button
+          type="button"
+          onClick={() => setShowMobileMap((v) => !v)}
+          className="btn-outline flex items-center gap-1.5 px-3 py-2 text-xs lg:hidden"
+        >
+          <Map className="h-3.5 w-3.5" />
+          {showMobileMap ? "Hide map" : "Show map"}
+        </button>
+      </div>
+
+      {/* Search + controls */}
       <form onSubmit={submitSearch} className="mt-4 flex flex-col gap-3 sm:flex-row">
         <div className="card-elevated flex flex-1 items-center gap-2 rounded-full p-1.5">
           <SearchIcon className="ml-3 h-4 w-4 shrink-0 text-muted-foreground" />
@@ -315,16 +347,15 @@ function BrowsePage() {
           className="btn-outline px-4 py-2.5 text-sm"
           title="Use my location"
         >
-          <LocateFixed className="h-4 w-4" /> {locating ? "Locating…" : "My location"}
+          <LocateFixed className="h-4 w-4" /> {locating ? "Locating…" : "Near me"}
         </button>
       </form>
 
+      {/* Filters panel */}
       {showFilters && (
         <div className="card-elevated mt-4 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">
-              Category
-            </label>
+            <label className="mb-1 block text-xs font-semibold text-muted-foreground">Category</label>
             <select
               className="input-base"
               value={category}
@@ -336,18 +367,14 @@ function BrowsePage() {
             >
               <option value="">All categories</option>
               {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
+                <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </div>
           <div className="sm:col-span-2">
             <label className="mb-1 flex items-center justify-between text-xs font-semibold text-muted-foreground">
               <span>Distance</span>
-              <span className="text-foreground">
-                {distance ? `Within ${distance} km` : "Any distance"}
-              </span>
+              <span className="text-foreground">{distance ? `Within ${distance} km` : "Any distance"}</span>
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -356,19 +383,13 @@ function BrowsePage() {
                 max={50}
                 step={5}
                 value={distance ? Number(distance) : 5}
-                onChange={(e) => {
-                  setDistance(e.target.value);
-                  setPage(1);
-                }}
+                onChange={(e) => { setDistance(e.target.value); setPage(1); }}
                 className="w-full accent-primary"
               />
               {distance && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setDistance("");
-                    setPage(1);
-                  }}
+                  onClick={() => { setDistance(""); setPage(1); }}
                   className="shrink-0 text-xs font-semibold text-muted-foreground hover:text-foreground"
                 >
                   Clear
@@ -376,64 +397,36 @@ function BrowsePage() {
               )}
             </div>
             <div className="mt-0.5 flex justify-between text-[10px] text-muted-foreground">
-              <span>5 km</span>
-              <span>50 km</span>
+              <span>5 km</span><span>50 km</span>
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">
-              Min price (₹/day)
-            </label>
+            <label className="mb-1 block text-xs font-semibold text-muted-foreground">Min price (₹/day)</label>
             <input
-              type="number"
-              min="0"
-              className="input-base"
-              placeholder="0"
+              type="number" min="0" className="input-base" placeholder="0"
               value={minPrice}
-              onChange={(e) => {
-                setMinPrice(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">
-              Max price (₹/day)
-            </label>
+            <label className="mb-1 block text-xs font-semibold text-muted-foreground">Max price (₹/day)</label>
             <input
-              type="number"
-              min="0"
-              className="input-base"
-              placeholder="5000"
+              type="number" min="0" className="input-base" placeholder="5000"
               value={maxPrice}
-              onChange={(e) => {
-                setMaxPrice(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">
-              Availability
-            </label>
-            <select
-              className="input-base"
-              value={availability}
-              onChange={(e) => {
-                setAvailability(e.target.value);
-                setPage(1);
-              }}
-            >
+            <label className="mb-1 block text-xs font-semibold text-muted-foreground">Availability</label>
+            <select className="input-base" value={availability}
+              onChange={(e) => { setAvailability(e.target.value); setPage(1); }}>
               <option value="">Any</option>
               <option value="AVAILABLE">Available</option>
               <option value="BOOKED">Booked</option>
             </select>
           </div>
           {hasFilters && (
-            <button
-              onClick={clearFilters}
-              className="btn-outline px-4 py-2 text-xs lg:col-span-5 lg:justify-self-start"
-            >
+            <button onClick={clearFilters} className="btn-outline px-4 py-2 text-xs lg:col-span-5 lg:justify-self-start">
               <X className="h-3.5 w-3.5" /> Clear filters
             </button>
           )}
@@ -443,77 +436,52 @@ function BrowsePage() {
       {locationNotice && (
         <div className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
           <span>{locationNotice}</span>
-          <button
-            type="button"
-            onClick={() => setLocationNotice(null)}
-            className="shrink-0 font-semibold hover:underline"
-          >
+          <button type="button" onClick={() => setLocationNotice(null)} className="shrink-0 font-semibold hover:underline">
             Dismiss
           </button>
         </div>
       )}
 
-      {/* Map */}
-      <div className="relative mt-5 overflow-hidden rounded-2xl border border-border shadow-(--shadow-card)">
-        {MapView ? (
-          <MapView
-            center={mapCenter}
-            assets={assets}
-            userLocation={userLocation}
-            clickedPoint={clickedPoint}
-            radiusKm={distance ? Number(distance) : undefined}
-            onMapClick={handleMapClick}
-            onAssetClick={(id) => navigate({ to: "/assets/$assetId", params: { assetId: id } })}
-          />
-        ) : (
-          <div className="flex h-[60vh] items-center justify-center bg-muted text-sm text-muted-foreground">
-            Loading map…
+      {/* Mobile map (toggle-able) */}
+      {showMobileMap && (
+        <div className="mt-4 h-64 overflow-hidden lg:hidden">
+          {MapPanel}
+        </div>
+      )}
+
+      {/* Main two-column layout */}
+      <div className="mt-6 flex gap-6">
+        {/* Results — left column */}
+        <div className="min-w-0 flex-1">
+          {loading ? (
+            <AssetCardSkeletonGrid count={8} />
+          ) : error ? (
+            <ErrorState message={error} onRetry={fetchAssets} />
+          ) : assets.length === 0 ? (
+            <EmptyState
+              title="No items found"
+              description="Try widening your filters or searching for something else."
+            />
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:grid-cols-3">
+                {sortedAssets.map((a) => (
+                  <AssetCard key={a.id} asset={a} />
+                ))}
+              </div>
+              {pagination && (
+                <Pagination pagination={{ ...pagination, page }} onPageChange={setPage} />
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Map — sticky right column, desktop only */}
+        <div className="hidden lg:block lg:w-[420px] xl:w-[480px] shrink-0">
+          <div className="sticky top-20 h-[calc(100vh-6rem)]">
+            {MapPanel}
           </div>
-        )}
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full bg-muted px-3 py-1.5 font-medium text-muted-foreground">
-          Map centre: {fmtCoord(center.latitude)}, {fmtCoord(center.longitude)}
-        </span>
-        {userLocation && (
-          <span className="rounded-full bg-blue-500/10 px-3 py-1.5 font-medium text-blue-700">
-            Your location: {fmtCoord(userLocation[0])}, {fmtCoord(userLocation[1])}
-          </span>
-        )}
-        {clickedPoint && (
-          <span className="rounded-full bg-amber-500/10 px-3 py-1.5 font-medium text-amber-700">
-            Selected point: {fmtCoord(clickedPoint[0])}, {fmtCoord(clickedPoint[1])}
-          </span>
-        )}
-        <span className="rounded-full bg-muted px-3 py-1.5 font-medium text-muted-foreground">
-          Tap the map to see any point's coordinates
-        </span>
-      </div>
-
-      {/* Results */}
-      <div className="mt-6">
-        {loading ? (
-          <AssetCardSkeletonGrid count={8} />
-        ) : error ? (
-          <ErrorState message={error} onRetry={fetchAssets} />
-        ) : assets.length === 0 ? (
-          <EmptyState
-            title="No items found"
-            description="Try widening your filters or searching for something else."
-          />
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {sortedAssets.map((a) => (
-                <AssetCard key={a.id} asset={a} />
-              ))}
-            </div>
-            {pagination && (
-              <Pagination pagination={{ ...pagination, page }} onPageChange={setPage} />
-            )}
-          </>
-        )}
+        </div>
       </div>
     </div>
   );

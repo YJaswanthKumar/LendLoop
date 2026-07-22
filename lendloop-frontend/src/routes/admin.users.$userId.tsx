@@ -12,7 +12,7 @@ import { formatDate, formatPrice, initials, timeAgo } from "@/utils/format";
 import type { AdminUserDetail } from "@/utils/types";
 
 export const Route = createFileRoute("/admin/users/$userId")({
-  head: () => ({ meta: [{ title: "User detail — Admin — LendLoop" }] }),
+  head: () => ({ meta: [{ title: "User detail — Admin — ROL" }] }),
   component: AdminUserDetailPage,
 });
 

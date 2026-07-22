@@ -21,7 +21,7 @@ import { getAdminAnalytics } from "@/services/adminService";
 import type { AdminAnalytics } from "@/utils/types";
 
 export const Route = createFileRoute("/admin/analytics")({
-  head: () => ({ meta: [{ title: "Analytics — Admin — LendLoop" }] }),
+  head: () => ({ meta: [{ title: "Analytics — Admin — ROL" }] }),
   component: AdminAnalyticsPage,
 });
 

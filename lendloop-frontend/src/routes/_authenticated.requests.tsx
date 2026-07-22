@@ -26,7 +26,7 @@ import type { Rental } from "@/utils/types";
 export const Route = createFileRoute("/_authenticated/requests")({
   head: () => ({
     meta: [
-      { title: "Rental requests — LendLoop" },
+      { title: "Rental requests — ROL" },
       { name: "description", content: "Manage incoming and outgoing rental requests: accept, reject or counter offer." },
     ],
   }),

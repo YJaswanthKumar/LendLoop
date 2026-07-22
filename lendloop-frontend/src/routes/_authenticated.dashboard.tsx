@@ -27,8 +27,8 @@ import type { AppNotification, Asset, DashboardOverview, Rental } from "@/utils/
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — LendLoop" },
-      { name: "description", content: "Your LendLoop overview: assets, rentals, requests and notifications." },
+      { title: "Dashboard — ROL" },
+      { name: "description", content: "Your ROL overview: assets, rentals, requests and notifications." },
     ],
   }),
   component: DashboardPage,

@@ -24,7 +24,7 @@ import { timeAgo } from "@/utils/format";
 import type { ActivityLog, AdminAnalytics, AdminOverview } from "@/utils/types";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Admin overview — LendLoop" }] }),
+  head: () => ({ meta: [{ title: "Admin overview — ROL" }] }),
   component: AdminOverviewPage,
 });
 

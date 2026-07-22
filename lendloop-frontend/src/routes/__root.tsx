@@ -81,14 +81,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "LendLoop — Rent & Lend in Your Community" },
+      { title: "ROL — Rent or Lend in Your Community" },
       {
         name: "description",
         content:
-          "LendLoop is a peer-to-peer rental marketplace. Rent cameras, laptops, tools and more from neighbours nearby — or earn by lending your own.",
+          "ROL (Rent or Lend) — get anything from neighbours nearby, or earn from your own things. Cameras, laptops, tools, gear and more.",
       },
-      { name: "author", content: "LendLoop" },
-      { property: "og:title", content: "LendLoop — Rent & Lend in Your Community" },
+      { name: "author", content: "ROL" },
+      { property: "og:title", content: "ROL — Rent or Lend in Your Community" },
       {
         property: "og:description",
         content: "Peer-to-peer rentals: borrow what you need, lend what you don't.",

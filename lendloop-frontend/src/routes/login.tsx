@@ -7,10 +7,10 @@ import { getApiError } from "@/api/api";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Log in — LendLoop" },
-      { name: "description", content: "Log in to your LendLoop account to rent and lend items in your community." },
-      { property: "og:title", content: "Log in — LendLoop" },
-      { property: "og:description", content: "Access your LendLoop dashboard, rentals and listings." },
+      { title: "Log in — ROL" },
+      { name: "description", content: "Log in to your ROL account to rent and lend items in your community." },
+      { property: "og:title", content: "Log in — ROL" },
+      { property: "og:description", content: "Access your ROL dashboard, rentals and listings." },
     ],
   }),
   component: LoginPage,
@@ -90,7 +90,7 @@ function LoginPage() {
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-muted-foreground">
-        New to LendLoop?{" "}
+        New to ROL?{" "}
         <Link to="/register" className="font-semibold text-primary hover:underline">
           Create an account
         </Link>

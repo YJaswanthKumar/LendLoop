@@ -16,8 +16,8 @@ import { deleteAsset, getAsset, updateAsset } from "@/services/assetService";
 export const Route = createFileRoute("/_authenticated/edit-asset/$assetId")({
   head: () => ({
     meta: [
-      { title: "Edit listing — LendLoop" },
-      { name: "description", content: "Update your LendLoop listing details, price and availability." },
+      { title: "Edit listing — ROL" },
+      { name: "description", content: "Update your ROL listing details, price and availability." },
     ],
   }),
   component: EditAssetPage,
