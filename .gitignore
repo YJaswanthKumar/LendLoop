@@ -25,7 +25,6 @@ npm-debug.log*
 # Replit / AI-agent workspace metadata — not part of the application,
 # not needed to run or deploy this project.
 .replit
-replit.md
 .agents/
 .cache/
 .local/
